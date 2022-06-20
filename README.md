@@ -1,2 +1,2 @@
-# bevy_game
-A basic Rust game made with the Bevy game engine.
+# bevy_topdown_2D_game
+Currently, this game is a square with a top-down camera that moves with the player.
