@@ -6,12 +6,11 @@ use crate::game::global::TIME_STEP;
 use crate::game::boundary::*;
 
 // Player constants
-pub const PLAYER_SIZE: Vec3 = const_vec3!([60.0, 60.0, 0.0]);
+pub const PLAYER_SIZE: Vec3 = const_vec3!([3.0, 3.0, 0.0]);
 pub const PLAYER_SPEED: f32 = 700.0;
 pub const PLAYER_PADDING: f32 = 10.0;
 pub const STARTING_Y: f32 = 0.0;
 pub const STARTING_X: f32 = 0.0;
-pub const PLAYER_COLOR: Color = Color::rgb(0.2, 0.2, 0.6);
 
 #[derive(Component)]
 pub struct Player;
