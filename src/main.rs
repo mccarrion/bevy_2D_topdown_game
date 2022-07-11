@@ -19,6 +19,7 @@ fn main() {
                 .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
                 .with_system(move_player)
                 .with_system(move_camera)
+                .with_system(animate_player_sprite)
         )
         .add_system(bevy::input::system::exit_on_esc_system)
         .run();
@@ -51,10 +52,10 @@ fn setup(
                 scale: PLAYER_SIZE,
                 ..default()
             },
-            texture_atlas: texture_atlas_handle.clone(),
-            sprite: TextureAtlasSprite::new(0),
+            texture_atlas: texture_atlas_handle,
             ..default()
         })
+        .insert(AnimationTimer::new(Timer::from_seconds(0.1, true)))
         .insert(Collider);
 
     // Boundaries

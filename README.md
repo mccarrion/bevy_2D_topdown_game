@@ -1,5 +1,5 @@
 # bevy_topdown_game
-Currently, this game is a square with a top-down camera that moves with the player.
+Currently, this game is an animated sprite that can move within a set of boundaries.
 
-Credit for assets: [Cup Nooble](https://cupnooble.itch.io/)
-Example used to start project: [Bevy breakout example](https://github.com/bevyengine/bevy/blob/main/examples/games/breakout.rs)
+Credit for assets: [Cup Nooble](https://cupnooble.itch.io/) \
+Project borrows heavily from Bevy engine examples: [Bevy example set](https://github.com/bevyengine/bevy/blob/main/examples)

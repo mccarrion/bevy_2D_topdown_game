@@ -47,3 +47,45 @@ pub fn move_player(
     let upper_bound = UPPER_BOUND - WALL_THICKNESS / 2.0 - PLAYER_SIZE.y / 2.0 - PLAYER_PADDING;
     player_transform.translation.y = new_player_position_y.clamp(lower_bound, upper_bound);
 }
+
+#[derive(Component, Deref, DerefMut)]
+pub struct AnimationTimer(Timer);
+
+impl AnimationTimer {
+    pub fn new (timer: Timer) -> AnimationTimer {
+        AnimationTimer(timer)
+    }
+}
+
+/*
+ * TODO: implementation is a little buggy and relies on hard-coding inputs
+ * TODO: need to refactor out bugs and update it to take an array of inputs
+ */
+pub fn animate_player_sprite(
+    time: Res<Time>,
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(
+        &mut AnimationTimer,
+        &mut TextureAtlasSprite,
+    )>,
+) {
+    for (mut timer, mut sprite) in query.iter_mut() {
+        timer.tick(time.delta());
+        if timer.just_finished() {
+            let num_cols = 4;
+            if keyboard_input.pressed(KeyCode::Down) {
+                sprite.index = (sprite.index + 1) % (num_cols) + (num_cols * 0);
+            }
+            if keyboard_input.pressed(KeyCode::Up) {
+                sprite.index = (sprite.index + 1) % (num_cols) + (num_cols * 1);
+            }
+            if keyboard_input.pressed(KeyCode::Left) {
+                sprite.index = (sprite.index + 1) % (num_cols) + (num_cols * 2);
+            }
+            if keyboard_input.pressed(KeyCode::Right) {
+                sprite.index = (sprite.index + 1) % (num_cols) + (num_cols * 3);
+            }
+
+        }
+    }
+}
