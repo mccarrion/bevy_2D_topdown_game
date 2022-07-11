@@ -58,8 +58,8 @@ impl AnimationTimer {
 }
 
 /*
- * TODO: implementation is a little buggy and relies on hard-coding inputs
- * TODO: need to refactor out bugs and update it to take an array of inputs
+ * TODO: animation starts at first index if you press two KeyCodes at once need to refactor that out
+ * TODO: update method to remove hard-coding and implement Event detection
  */
 pub fn animate_player_sprite(
     time: Res<Time>,
