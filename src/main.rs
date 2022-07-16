@@ -35,7 +35,7 @@ fn setup(
 
     // Player
     let texture_handle = asset_server
-        .load( "characters/basic_character_spritesheet.png");
+        .load( "sprout_lands/characters/basic_character_spritesheet.png");
     let texture_atlas = TextureAtlas::from_grid(
         texture_handle,
         Vec2::new(50.0, 50.0),
