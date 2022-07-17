@@ -62,7 +62,7 @@ fn setup(
     #[derive(Component)]
     pub struct Background;
 
-    let background_texture_handle = asset_server.load("tiled/output/dirt.bmp");
+    let background_texture_handle = asset_server.load("tiled/output/water.png");
     commands
         .spawn()
         .insert(Background)
