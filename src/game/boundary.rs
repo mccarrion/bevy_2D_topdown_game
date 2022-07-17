@@ -1,10 +1,10 @@
 use bevy::prelude::*;
 
 // Stage boundary constants
-pub const LEFT_BOUND: f32 = -1050.;      // X boundary
-pub const RIGHT_BOUND: f32 = 1050.;      // X boundary
-pub const LOWER_BOUND: f32 = -800.;     // Y boundary
-pub const UPPER_BOUND: f32 = 800.;      // Y boundary
+pub const LEFT_BOUND: f32 = -1150.;      // X boundary
+pub const RIGHT_BOUND: f32 = 1150.;      // X boundary
+pub const LOWER_BOUND: f32 = -1150.;     // Y boundary
+pub const UPPER_BOUND: f32 = 1150.;      // Y boundary
 pub const WALL_THICKNESS: f32 = 10.0;   // boundary thickness
 pub const WALL_COLOR: Color = Color::rgb(0.5, 0.5, 0.5);
 
