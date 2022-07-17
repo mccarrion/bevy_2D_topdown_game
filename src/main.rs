@@ -28,14 +28,14 @@ fn main() {
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
     // Camera
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 
     // Player
     let texture_handle = asset_server
-        .load( "sprout_lands/characters/basic_character_spritesheet.png");
+        .load("sprout_lands/characters/basic_character_spritesheet.png");
     let texture_atlas = TextureAtlas::from_grid(
         texture_handle,
         Vec2::new(50.0, 50.0),
@@ -46,7 +46,7 @@ fn setup(
     commands
         .spawn()
         .insert(Player)
-        .insert_bundle(SpriteSheetBundle{
+        .insert_bundle(SpriteSheetBundle {
             transform: Transform {
                 translation: Vec3::new(STARTING_X, STARTING_Y, 0.0),
                 scale: PLAYER_SIZE,
@@ -57,6 +57,23 @@ fn setup(
         })
         .insert(AnimationTimer::new(Timer::from_seconds(0.1, true)))
         .insert(Collider);
+
+    // Spawn background
+    #[derive(Component)]
+    pub struct Background;
+
+    let background_texture_handle = asset_server.load("tiled/output/dirt.bmp");
+    commands
+        .spawn()
+        .insert(Background)
+        .insert_bundle(SpriteBundle {
+            texture: background_texture_handle,
+            transform: Transform {
+                scale: PLAYER_SIZE,
+                ..default()
+            },
+            ..Default::default()
+        });
 
     // Boundaries
     commands.spawn_bundle(BoundaryBundle::new(BoundaryLocation::Left));
