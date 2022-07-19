@@ -1,5 +1,8 @@
 mod game;
 
+use std::fs;
+use std::fs::File;
+use std::io::Read;
 use game::boundary::*;
 use game::global::*;
 use game::player::*;
@@ -8,6 +11,8 @@ use bevy::{
     core::FixedTimestep,
     prelude::*,
 };
+use serde::*;
+use serde_json::*;
 
 fn main() {
     App::new()
@@ -75,9 +80,32 @@ fn setup(
             ..Default::default()
         });
 
+    let ts = tileset_struct_from_json();
+
     // Boundaries
     commands.spawn_bundle(BoundaryBundle::new(BoundaryLocation::Left));
     commands.spawn_bundle(BoundaryBundle::new(BoundaryLocation::Right));
     commands.spawn_bundle(BoundaryBundle::new(BoundaryLocation::Lower));
     commands.spawn_bundle(BoundaryBundle::new(BoundaryLocation::Upper));
+}
+
+#[derive(Serialize, Deserialize)]
+struct TileSet {
+    columns: i8,
+    image: String,
+    imageheight: i8,
+    imagewidth: i8,
+    margin: i8,
+    name: String,
+    spacing: i8,
+    tilecount: i8,
+    tiledversion: String,
+    tileheight: i8,
+    tilewidth: i8,
+    version: String
+}
+
+fn tileset_struct_from_json() -> TileSet {
+    let tileset_data = fs::read_to_string("./assets/tiled/tilesets/fences.json");
+    return from_str(&tileset_data.unwrap()).unwrap();
 }
