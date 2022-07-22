@@ -5,28 +5,48 @@ use serde_json::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct TileSet {
-    columns: i8,
+    columns: i16,
     image: String,
-    imageheight: i8,
-    imagewidth: i8,
-    margin: i8,
+    imageheight: i16,
+    imagewidth: i16,
+    margin: i16,
     name: String,
-    spacing: i8,
-    tilecount: i8,
+    spacing: i16,
+    tilecount: i16,
     tiledversion: String,
-    tileheight: i8,
-    tilewidth: i8,
+    tileheight: i16,
+    tilewidth: i16,
     #[serde(alias = "type")]
     ts_type: String,
     version: String
 }
 
-pub fn tileset_map_from_json() -> HashMap<String, TileSet> {
+#[derive(Serialize, Deserialize)]
+pub struct TileMap {
+    compressionlevel: String,
+    height: i16,
+    infinite: String,
+    layers: Vec<String>, // update to be list of structs
+    nextlayerid: i16,
+    nextobjectid: i16,
+    orientation: String,
+    renderorder: String,
+    tiledversion: String,
+    tileheight: i16,
+    tilesets: Vec<String>, // update to be list of structs
+    tilewidth: i16,
+    #[serde(alias = "type")]
+    tm_type: String,
+    version: String,
+    width: i16
+}
+
+pub fn generate_map_from_tiled_config() {
     let mut tileset_map: HashMap<String, TileSet> = HashMap::new();
     for file in fs::read_dir("./assets/tiled/tilesets").unwrap() {
-        let result = file.unwrap().path().display();
+        let tileset_data = fs::read_to_string(
+            file.unwrap().path().display().to_string());
+        let tileset: TileSet = from_str(&tileset_data.unwrap()).unwrap();
+        tileset_map.insert(String::from(&tileset.name), tileset);
     }
-    let tileset_data = fs::read_to_string("./assets/tiled/tilesets/fences.json");
-    //return from_str(&tileset_data.unwrap()).unwrap();
-    return tileset_map;
 }

@@ -77,7 +77,7 @@ fn setup(
         });
 
     // Note: this line is for testing generation of TileMap from JSON functions
-    let ts = tileset_map_from_json();
+    generate_map_from_tiled_config();
 
     // Boundaries
     commands.spawn_bundle(BoundaryBundle::new(BoundaryLocation::Left));
