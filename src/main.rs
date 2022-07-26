@@ -3,7 +3,6 @@ mod game;
 use game::boundary::*;
 use game::global::*;
 use game::player::*;
-use game::map::*;
 
 use bevy::{
     core::FixedTimestep,
@@ -75,9 +74,6 @@ fn setup(
             },
             ..Default::default()
         });
-
-    // Note: this line is for testing generation of TileMap from JSON functions
-    generate_map_from_tiled_config();
 
     // Boundaries
     commands.spawn_bundle(BoundaryBundle::new(BoundaryLocation::Left));

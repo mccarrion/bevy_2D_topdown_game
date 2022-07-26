@@ -65,7 +65,7 @@ struct TileLayer {
 }
 
 pub fn generate_map_from_tiled_config() {
-    let mut tilemap_data = fs::read_to_string("./assets/tiled/maps/sprout_land.tmj");
+    let mut tilemap_data = fs::read_to_string("../assets/tiled/maps/sprout_land.tmj");
     let mut tilemap: TileMap = from_str(&tilemap_data.unwrap()).unwrap();
     let tileset_ids: Vec<TileSetId> = tilemap.tilesets;
 
