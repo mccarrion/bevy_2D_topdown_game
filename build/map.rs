@@ -69,14 +69,26 @@ pub fn generate_map_from_tiled_config() {
     let mut tilemap: TileMap = from_str(&tilemap_data.unwrap()).unwrap();
     let tileset_ids: Vec<TileSetId> = tilemap.tilesets;
 
-    // Create map of TileSets
-    // TODO: update to RangeMap
+    /*
+     * This code generates two maps based on Tiled config
+     *      tileset_map: this is a map of the firstgid of a TileSet config to a defined TileSet
+     *      range_cache_map: this is a map of each id for a TileSet to the firstgid in a TileSet
+     *
+     * These two maps are sufficient to begin drawing PNG files of map layers based on Tiled config
+     */
     let mut tileset_map: HashMap<i16, TileSet> = HashMap::new();
+    let mut range_cache_map: HashMap<i16, i16> = HashMap::new();
     for tileset_id in tileset_ids {
         let str: String = String::from(&tileset_id.source);
-        let tileset_dir: String = str.replace("..", "./assets/tiled");
+        let tileset_dir: String = str.replace("..", "../assets/tiled");
         let tileset_data: String = fs::read_to_string(tileset_dir).unwrap();
         let tileset: TileSet = from_str(&tileset_data).unwrap();
+        let lastgid = tileset_id.firstgid + tileset.tilecount;
+        for n in tileset_id.firstgid..lastgid {
+            range_cache_map.insert(n,tileset_id.firstgid);
+        }
         tileset_map.insert(tileset_id.firstgid, tileset);
     }
+
+
 }
