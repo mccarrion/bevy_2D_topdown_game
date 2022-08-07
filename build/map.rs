@@ -2,7 +2,7 @@ use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::fs;
 use std::fs::DirEntry;
-use image::{DynamicImage, GenericImage};
+use image::{DynamicImage, GenericImage, ImageBuffer, RgbImage};
 use image::imageops::tile;
 use image::math::Rect;
 use serde::*;
@@ -72,6 +72,9 @@ pub fn generate_map_from_tiled_config() {
     let mut tilemap: TileMap = from_str(&tilemap_data.unwrap()).unwrap();
     let tileset_ids: Vec<TileSetId> = tilemap.tilesets;
 
+    let mut tilewidth: i16 = 0;
+    let mut tileheight: i16 = 0;
+
     let mut tile_map: HashMap<i16, DynamicImage> = HashMap::new();
     for tileset_id in tileset_ids {
         let str: String = String::from(&tileset_id.source);
@@ -86,18 +89,25 @@ pub fn generate_map_from_tiled_config() {
         let mut row: i16 = 0;
         let mut tile_id = tileset_id.firstgid;
         let columns: i16 = tileset.columns;
-        /*
-         * This loop maps all tiles to their gid assigned by Tiled
-         * TODO: this loop has an off-by-one bug need to fix
-         */
+
+        if tilewidth == 0 {
+            tilewidth = tileset.tilewidth;
+        }
+
+        if tileheight == 0 {
+            tileheight = tileset.tileheight;
+        }
+
+        // This loop maps all tiles to their gid assigned by Tiled
+        // TODO: this loop has an off-by-one bug need to fix
         for n in 0..tile_quantity {
-            let x_offset: u32 = (tileset.tilewidth * col) as u32;
-            let y_offset: u32 = (tileset.tileheight * row) as u32;
+            let x_offset: u32 = (tilewidth * col) as u32;
+            let y_offset: u32 = (tileheight * row) as u32;
             let tile_img = img.crop(
                 x_offset,
                 y_offset,
-                tileset.tilewidth as u32,
-                tileset.tilewidth as u32);
+                tileheight as u32,
+                tileheight as u32);
             if n % columns == 0 {
                 col = 0;
                 row += 1;
@@ -108,9 +118,30 @@ pub fn generate_map_from_tiled_config() {
         }
     }
 
-
     let layers: Vec<TileLayer> = tilemap.layers;
     for layer in layers {
-        // TODO: create PNG layers here
+        let data: Vec<i16> = layer.data;
+        let columns: i16 = layer.width;
+        let rows: i16 = layer.height;
+        let imgx = (tilewidth * columns) as u32;
+        let imgy = (tileheight * rows) as u32;
+        let mut img: DynamicImage = DynamicImage::new_rgb16(imgx, imgy);
+        let mut count: i16 = 0;
+        let mut col: i16 = 0;
+        let mut row: i16 = 0;
+        let filename: String = String::from(layer.name) + ".png";
+        // TODO: need to fix bugs for placing tiles at the correct offsets in the image buffer
+        for n in data {
+            if n != 0 {
+                let tile = tile_map.get(&n).unwrap();
+                img.copy_from(tile, (col * tilewidth) as u32, (row * tileheight) as u32).expect("TODO: panic message");
+            }
+            if count % columns == 0 {
+                col = 0;
+                row += 1;
+            }
+            count += 1;
+        }
+        img.save(&filename).expect("TODO: panic message");
     }
 }
