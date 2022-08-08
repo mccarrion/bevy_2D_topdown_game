@@ -139,6 +139,8 @@ pub fn draw_tile_layers(
         let data: Vec<i16> = layer.data;
         let columns: i16 = layer.width;
         let rows: i16 = layer.height;
+
+        // width and height of png file to draw
         let imgx = (tilewidth * columns) as u32;
         let imgy = (tileheight * rows) as u32;
         let mut img = ImageBuffer::new(imgx, imgy);
@@ -146,7 +148,9 @@ pub fn draw_tile_layers(
         let mut col: i16 = 1;
         let mut row: i16 = 1;
         let filename: String = String::from(layer.name) + ".png";
-        // TODO: need to fix bugs for placing tiles at the correct offsets in the image buffer
+
+        // This draws the map based on the tile gid and tile location defined by both the data
+        // vec and map width and height from the tmj file
         for n in data {
             if n != 0 {
                 let tile = tile_map.get(&n).unwrap();
@@ -162,7 +166,10 @@ pub fn draw_tile_layers(
             }
             count += 1;
         }
-        let mut filepath: String = "../assets/output/".to_owned();
+        let mut filepath: String = "../assets/output/map".to_owned();
+        fs::create_dir_all(&filepath)
+            .expect("Error creating directory for saving map layers");
+        filepath.push_str("/");
         filepath.push_str(&filename);
         img.save(filepath)
             .expect("Error saving image");
