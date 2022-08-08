@@ -1,0 +1,15 @@
+{
+  "columns": 10,
+  "image": "..\/..\/sprout_lands\/tilesets\/grass.png",
+  "imageheight": 128,
+  "imagewidth": 160,
+  "margin": 0,
+  "name": "grass",
+  "spacing": 0,
+  "tilecount": 80,
+  "tiledversion": "1.9.0",
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "version": "1.8"
+}

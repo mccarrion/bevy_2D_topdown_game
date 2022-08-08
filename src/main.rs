@@ -1,5 +1,7 @@
 mod game;
 
+use std::fs;
+use std::path::Path;
 use game::boundary::*;
 use game::global::*;
 use game::player::*;
@@ -42,7 +44,6 @@ fn setup(
         4,
         4);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
-
     commands
         .spawn()
         .insert(Player)
@@ -58,22 +59,30 @@ fn setup(
         .insert(AnimationTimer::new(Timer::from_seconds(0.1, true)))
         .insert(Collider);
 
-    // Spawn background
+    // Map
     #[derive(Component)]
-    pub struct Background;
-
-    let background_texture_handle = asset_server.load("tiled/output/water.png");
-    commands
-        .spawn()
-        .insert(Background)
-        .insert_bundle(SpriteBundle {
-            texture: background_texture_handle,
-            transform: Transform {
-                scale: PLAYER_SIZE,
-                ..default()
-            },
-            ..Default::default()
-        });
+    pub struct MapLayer;
+    let map_paths = fs::read_dir("./assets/output/map/").unwrap();
+    for map_path in map_paths {
+        let path = map_path.unwrap()
+            .path()
+            .display()
+            .to_string()
+            .replace("./assets/", "");
+        let layer_path = Path::new(&path);
+        let background_texture_handle = asset_server.load(layer_path);
+        commands
+            .spawn()
+            .insert(MapLayer)
+            .insert_bundle(SpriteBundle {
+                texture: background_texture_handle,
+                transform: Transform {
+                    scale: PLAYER_SIZE,
+                    ..default()
+                },
+                ..Default::default()
+            });
+    }
 
     // Boundaries
     commands.spawn_bundle(BoundaryBundle::new(BoundaryLocation::Left));

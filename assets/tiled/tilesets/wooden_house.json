@@ -1,0 +1,15 @@
+{
+  "columns": 7,
+  "image": "..\/..\/sprout_lands\/tilesets\/wooden_house.png",
+  "imageheight": 80,
+  "imagewidth": 112,
+  "margin": 0,
+  "name": "wooden_house",
+  "spacing": 0,
+  "tilecount": 35,
+  "tiledversion": "1.9.0",
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "version": "1.8"
+}
