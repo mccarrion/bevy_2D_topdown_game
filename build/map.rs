@@ -1,15 +1,11 @@
-use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::fs;
-use std::fs::DirEntry;
-use image::{DynamicImage, GenericImage, ImageBuffer, RgbImage};
-use image::imageops::tile;
-use image::math::Rect;
+use image::{DynamicImage, GenericImage, ImageBuffer};
 use serde::*;
 use serde_json::*;
 
 #[derive(Serialize, Deserialize)]
-struct TileSet {
+pub struct TileSet {
     columns: i16,
     image: String,
     imageheight: i16,
@@ -27,13 +23,13 @@ struct TileSet {
 }
 
 #[derive(Serialize, Deserialize)]
-struct TileSetId {
+pub struct TileSetId {
     firstgid: i16,
     source: String,
 }
 
 #[derive(Serialize, Deserialize)]
-struct TileMap {
+pub struct TileMap {
     compressionlevel: i16,
     height: i16,
     infinite: bool,
@@ -53,7 +49,7 @@ struct TileMap {
 }
 
 #[derive(Serialize, Deserialize)]
-struct TileLayer {
+pub struct TileLayer {
     data: Vec<i16>,
     height: i16,
     id: i16,
@@ -67,17 +63,39 @@ struct TileLayer {
     y: i16,
 }
 
+/*
+ * This method generates a series of PNG files corresponding to various layers defined
+ * by the main Tiled config file
+ */
 pub fn generate_map_from_tiled_config() {
-    let mut tilemap_data = fs::read_to_string("../assets/tiled/maps/sprout_land.tmj");
-    let mut tilemap: TileMap = from_str(&tilemap_data.unwrap()).unwrap();
-    let tileset_ids: Vec<TileSetId> = tilemap.tilesets;
+    // Generate TileMap struct from JSON file, the ".tmj" file
+    let tilemap_data = fs::read_to_string("../assets/tiled/maps/sprout_land.tmj");
+    let tilemap: TileMap = from_str(&tilemap_data.unwrap()).unwrap();
+    
+    // Extract data necessary to generate map layers from TileMap struct
+    let tilesetids: Vec<TileSetId> = tilemap.tilesets;
+    let layers: Vec<TileLayer> = tilemap.layers;
+    let tilewidth: i16 = tilemap.tilewidth;
+    let tileheight: i16 = tilemap.tileheight;
 
-    let mut tilewidth: i16 = 0;
-    let mut tileheight: i16 = 0;
+    // Create a map that maps each tile gid to a png of the tile itself
+    let tile_map: HashMap<i16, DynamicImage> = map_tile_to_gid(
+        tilesetids,
+        tilewidth,
+        tileheight);
 
+    // Draw layers of the TileMap based on the Tiled JSON config
+    draw_tile_layers(tile_map, layers, tilewidth, tileheight);
+}
+
+pub fn map_tile_to_gid(
+    tilesetids: Vec<TileSetId>,
+    tilewidth: i16,
+    tileheight: i16,
+) -> HashMap<i16, DynamicImage> {
     let mut tile_map: HashMap<i16, DynamicImage> = HashMap::new();
-    for tileset_id in tileset_ids {
-        let str: String = String::from(&tileset_id.source);
+    for tilesetid in tilesetids {
+        let str: String = String::from(&tilesetid.source);
         let tileset_json_dir: String = str.replace("..", "../assets/tiled");
         let tileset_data: String = fs::read_to_string(tileset_json_dir).unwrap();
         let tileset: TileSet = from_str(&tileset_data).unwrap();
@@ -87,23 +105,15 @@ pub fn generate_map_from_tiled_config() {
         let tile_quantity: i16 = tileset.tilecount;
         let mut col: i16 = 0;
         let mut row: i16 = 0;
-        let mut tile_id = tileset_id.firstgid;
+        let mut tile_id = tilesetid.firstgid;
         let columns: i16 = tileset.columns;
-
-        if tilewidth == 0 {
-            tilewidth = tileset.tilewidth;
-        }
-
-        if tileheight == 0 {
-            tileheight = tileset.tileheight;
-        }
 
         // This loop maps all tiles to their gid assigned by Tiled
         // TODO: this loop has an off-by-one bug need to fix
         for n in 0..tile_quantity {
             let x_offset: u32 = (tilewidth * col) as u32;
             let y_offset: u32 = (tileheight * row) as u32;
-            let tile_img = img.crop(
+            let tile_img: DynamicImage = img.crop(
                 x_offset,
                 y_offset,
                 tileheight as u32,
@@ -117,15 +127,22 @@ pub fn generate_map_from_tiled_config() {
             tile_id += 1;
         }
     }
+    return tile_map;
+}
 
-    let layers: Vec<TileLayer> = tilemap.layers;
+pub fn draw_tile_layers(
+    tile_map: HashMap<i16, DynamicImage>,
+    layers: Vec<TileLayer>,
+    tilewidth: i16,
+    tileheight: i16,
+) {
     for layer in layers {
         let data: Vec<i16> = layer.data;
         let columns: i16 = layer.width;
         let rows: i16 = layer.height;
         let imgx = (tilewidth * columns) as u32;
         let imgy = (tileheight * rows) as u32;
-        let mut img: DynamicImage = DynamicImage::new_rgb16(imgx, imgy);
+        let mut img = ImageBuffer::new(imgx, imgy);
         let mut count: i16 = 0;
         let mut col: i16 = 0;
         let mut row: i16 = 0;
@@ -134,7 +151,10 @@ pub fn generate_map_from_tiled_config() {
         for n in data {
             if n != 0 {
                 let tile = tile_map.get(&n).unwrap();
-                img.copy_from(tile, (col * tilewidth) as u32, (row * tileheight) as u32).expect("TODO: panic message");
+                img.copy_from(tile,
+                              (col * tilewidth) as u32,
+                              (row * tileheight) as u32)
+                    .expect("Error copying tile to DynamicImage");
             }
             if count % columns == 0 {
                 col = 0;
@@ -142,6 +162,9 @@ pub fn generate_map_from_tiled_config() {
             }
             count += 1;
         }
-        img.save(&filename).expect("TODO: panic message");
+        let mut filepath: String = "../assets/output/".to_owned();
+        filepath.push_str(&filename);
+        img.save(filepath)
+            .expect("Error saving image");
     }
 }
