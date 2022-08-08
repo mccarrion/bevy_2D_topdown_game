@@ -143,21 +143,22 @@ pub fn draw_tile_layers(
         let imgx = (tilewidth * columns) as u32;
         let imgy = (tileheight * rows) as u32;
         let mut img = ImageBuffer::new(imgx, imgy);
-        let mut count: i16 = 0;
-        let mut col: i16 = 0;
-        let mut row: i16 = 0;
+        let mut count: i16 = 1;
+        let mut col: i16 = 1;
+        let mut row: i16 = 1;
         let filename: String = String::from(layer.name) + ".png";
         // TODO: need to fix bugs for placing tiles at the correct offsets in the image buffer
         for n in data {
             if n != 0 {
                 let tile = tile_map.get(&n).unwrap();
                 img.copy_from(tile,
-                              (col * tilewidth) as u32,
-                              (row * tileheight) as u32)
+                              ((col - 1) * tilewidth) as u32,
+                              ((row - 1) * tileheight) as u32)
                     .expect("Error copying tile to DynamicImage");
             }
+            col += 1;
             if count % columns == 0 {
-                col = 0;
+                col = 1;
                 row += 1;
             }
             count += 1;
