@@ -71,7 +71,7 @@ pub fn generate_map_from_tiled_config() {
     // Generate TileMap struct from JSON file, the ".tmj" file
     let tilemap_data = fs::read_to_string("../assets/tiled/maps/sprout_land.tmj");
     let tilemap: TileMap = from_str(&tilemap_data.unwrap()).unwrap();
-    
+
     // Extract data necessary to generate map layers from TileMap struct
     let tilesetids: Vec<TileSetId> = tilemap.tilesets;
     let layers: Vec<TileLayer> = tilemap.layers;
@@ -109,8 +109,7 @@ pub fn map_tile_to_gid(
         let columns: i16 = tileset.columns;
 
         // This loop maps all tiles to their gid assigned by Tiled
-        // TODO: this loop has an off-by-one bug need to fix
-        for n in 0..tile_quantity {
+        for n in 1..(tile_quantity + 1) {
             let x_offset: u32 = (tilewidth * col) as u32;
             let y_offset: u32 = (tileheight * row) as u32;
             let tile_img: DynamicImage = img.crop(
@@ -118,12 +117,12 @@ pub fn map_tile_to_gid(
                 y_offset,
                 tileheight as u32,
                 tileheight as u32);
+            col += 1;
             if n % columns == 0 {
                 col = 0;
                 row += 1;
             }
             tile_map.insert(tile_id, tile_img);
-            col += 1;
             tile_id += 1;
         }
     }
