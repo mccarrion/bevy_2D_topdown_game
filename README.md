@@ -1,6 +1,6 @@
 # bevy_topdown_game
-Currently, this game is an animated sprite that can move within a set of boundaries on (underneath currently due to a 
-bug) a map dynamically generated based on Tiled configuration.
+Currently, this game is an animated sprite that can move within a set of boundaries on a map dynamically generated based 
+on Tiled configuration.
 
 # running the game
 Here is how to run the game:
