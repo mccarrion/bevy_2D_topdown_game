@@ -1,15 +1,17 @@
-mod game;
+pub mod player;
+pub mod boundary;
+pub mod global;
 
 use std::fs;
 use std::path::Path;
-use game::boundary::*;
-use game::global::*;
-use game::player::*;
 
 use bevy::{
     core::FixedTimestep,
     prelude::*,
 };
+use crate::boundary::*;
+use crate::global::*;
+use crate::player::*;
 
 fn main() {
     App::new()

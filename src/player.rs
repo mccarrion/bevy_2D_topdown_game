@@ -2,8 +2,8 @@ use bevy::{
     math::{const_vec3},
     prelude::*,
 };
-use crate::game::global::TIME_STEP;
-use crate::game::boundary::*;
+use crate::global::TIME_STEP;
+use crate::boundary::*;
 
 // Player constants
 pub const PLAYER_SIZE: Vec3 = const_vec3!([3.0, 3.0, 0.0]);
