@@ -1,6 +1,7 @@
 use bevy::{
     math::{const_vec3},
     prelude::*,
+    sprite::collide_aabb::{collide, Collision},
 };
 use crate::global::TIME_STEP;
 use crate::boundary::*;
@@ -15,9 +16,14 @@ pub const STARTING_X: f32 = 0.0;
 #[derive(Component)]
 pub struct Player;
 
+#[derive(Default)]
+pub struct CollisionEvent;
+
 pub fn move_player(
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<&mut Transform, With<Player>>
+    mut query: Query<&mut Transform, With<Player>>,
+    collider_query: Query<(&Transform), (With<Collider>, Without<Player>)>,
+    mut collision_events: EventWriter<CollisionEvent>,
 ) {
     let mut player_transform = query.single_mut();
 
@@ -46,13 +52,46 @@ pub fn move_player(
     let lower_bound = LOWER_BOUND + WALL_THICKNESS / 2.0 + PLAYER_SIZE.y / 2.0 + PLAYER_PADDING;
     let upper_bound = UPPER_BOUND - WALL_THICKNESS / 2.0 - PLAYER_SIZE.y / 2.0 - PLAYER_PADDING;
     player_transform.translation.y = new_player_position_y.clamp(lower_bound, upper_bound);
+
+    let player_size = player_transform.scale.truncate();
+
+    for (transform) in collider_query.iter() {
+        let collision = collide(
+            player_transform.translation,
+            player_size,
+            transform.translation,
+            transform.scale.truncate(),
+        );
+        if let Some(collision) = collision {
+            collision_events.send_default();
+
+            let mut stop_x = false;
+            let mut stop_y = false;
+
+            match collision {
+                Collision::Left => stop_x = player_transform.translation.x < 0.0,
+                Collision::Right => stop_x = player_transform.translation.x > 0.0,
+                Collision::Top => stop_y = player_transform.translation.y > 0.0,
+                Collision::Bottom => stop_y = player_transform.translation.y < 0.0,
+                Collision::Inside => { /* do nothing */ }
+            }
+
+            if stop_x {
+                player_transform.translation.x = -1.0;
+            }
+
+            if stop_y {
+                player_transform.translation.y = -1.0;
+            }
+        }
+    }
 }
 
 #[derive(Component, Deref, DerefMut)]
 pub struct AnimationTimer(Timer);
 
 impl AnimationTimer {
-    pub fn new (timer: Timer) -> AnimationTimer {
+    pub fn new(timer: Timer) -> AnimationTimer {
         AnimationTimer(timer)
     }
 }

@@ -18,6 +18,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .add_startup_system(setup)
+        .add_event::<CollisionEvent>()
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
@@ -88,8 +89,7 @@ fn setup(
             texture_atlas: texture_atlas_handle,
             ..default()
         })
-        .insert(AnimationTimer::new(Timer::from_seconds(0.1, true)))
-        .insert(Collider);
+        .insert(AnimationTimer::new(Timer::from_seconds(0.1, true)));
     z_order += 0.1;
 
     // Boundaries
