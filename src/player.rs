@@ -27,7 +27,7 @@ pub fn move_player(
 ) {
     let mut player_transform = query.single_mut();
 
-    // Update X position of the Player
+    // Generate new X position of the Player based on KeyCode input
     let mut direction_x = 0.0;
     if keyboard_input.pressed(KeyCode::Left) {
         direction_x -= 1.0;
@@ -36,11 +36,9 @@ pub fn move_player(
         direction_x += 1.0;
     }
     let new_player_position_x = player_transform.translation.x + direction_x * PLAYER_SPEED * TIME_STEP;
-    let left_bound = LEFT_BOUND + WALL_THICKNESS / 2.0 + PLAYER_SIZE.x / 2.0 + PLAYER_PADDING;
-    let right_bound = RIGHT_BOUND - WALL_THICKNESS / 2.0 - PLAYER_SIZE.x / 2.0 - PLAYER_PADDING;
-    player_transform.translation.x = new_player_position_x.clamp(left_bound, right_bound);
+    let future_x_position: Vec3 = const_vec3!([new_player_position_x, 0.0, 0.0]);
 
-    // Update Y position of the Player
+    // Generate new Y position of the Player based on KeyCode input
     let mut direction_y = 0.0;
     if keyboard_input.pressed(KeyCode::Up) {
         direction_y += 1.0;
@@ -49,41 +47,44 @@ pub fn move_player(
         direction_y -= 1.0;
     }
     let new_player_position_y = player_transform.translation.y + direction_y * PLAYER_SPEED * TIME_STEP;
-    let lower_bound = LOWER_BOUND + WALL_THICKNESS / 2.0 + PLAYER_SIZE.y / 2.0 + PLAYER_PADDING;
-    let upper_bound = UPPER_BOUND - WALL_THICKNESS / 2.0 - PLAYER_SIZE.y / 2.0 - PLAYER_PADDING;
-    player_transform.translation.y = new_player_position_y.clamp(lower_bound, upper_bound);
+    let future_y_position: Vec3 = const_vec3!([0.0, new_player_position_y, 0.0]);
 
     let player_size = player_transform.scale.truncate();
 
+    let mut x_collided = false;
+    let mut y_collided = false;
+
     for (transform) in collider_query.iter() {
-        let collision = collide(
-            player_transform.translation,
+
+        let collision_x = collide(
+            future_x_position,
             player_size,
             transform.translation,
             transform.scale.truncate(),
         );
-        if let Some(collision) = collision {
+        if let Some(_collision_x) = collision_x {
             collision_events.send_default();
-
-            let mut stop_x = false;
-            let mut stop_y = false;
-
-            match collision {
-                Collision::Left => stop_x = player_transform.translation.x < 0.0,
-                Collision::Right => stop_x = player_transform.translation.x > 0.0,
-                Collision::Top => stop_y = player_transform.translation.y > 0.0,
-                Collision::Bottom => stop_y = player_transform.translation.y < 0.0,
-                Collision::Inside => { /* do nothing */ }
-            }
-
-            if stop_x {
-                player_transform.translation.x = -1.0;
-            }
-
-            if stop_y {
-                player_transform.translation.y = -1.0;
-            }
+            x_collided = true;
         }
+
+        let collision_y = collide(
+            future_y_position,
+            player_size,
+            transform.translation,
+            transform.scale.truncate(),
+        );
+        if let Some(_collision_y) = collision_y {
+            collision_events.send_default();
+            y_collided = true;
+        }
+    }
+
+    if !x_collided {
+        player_transform.translation.x = new_player_position_x;
+    }
+
+    if !y_collided {
+        player_transform.translation.y = new_player_position_y;
     }
 }
 
