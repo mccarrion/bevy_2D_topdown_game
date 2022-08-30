@@ -1,6 +1,7 @@
 pub mod player;
 pub mod boundary;
 pub mod global;
+pub mod map;
 
 use std::fs;
 use std::path::Path;
@@ -11,6 +12,7 @@ use bevy::{
 };
 use crate::boundary::*;
 use crate::global::*;
+use crate::map::MapBundle;
 use crate::player::*;
 
 fn main() {
@@ -23,7 +25,6 @@ fn main() {
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
                 .with_system(move_player)
-                .with_system(move_camera)
                 .with_system(animate_player_sprite)
         )
         .add_system(bevy::input::system::exit_on_esc_system)
@@ -42,29 +43,12 @@ fn setup(
     let mut z_order: f32 = 0.0;
 
     // Map
-    #[derive(Component)]
-    pub struct MapLayer;
     let map_paths = fs::read_dir("./assets/output/map/").unwrap();
     for map_path in map_paths {
-        let path = map_path.unwrap()
-            .path()
-            .display()
-            .to_string()
-            .replace("./assets/", "");
-        let layer_path = Path::new(&path);
-        let background_texture_handle = asset_server.load(layer_path);
-        commands
-            .spawn()
-            .insert(MapLayer)
-            .insert_bundle(SpriteBundle {
-                texture: background_texture_handle,
-                transform: Transform {
-                    translation: Vec3::new(0.0, 0.0, z_order),
-                    scale: PLAYER_SIZE,
-                    ..default()
-                },
-                ..Default::default()
-            });
+        commands.spawn_bundle(MapBundle::new(
+            map_path.unwrap(),
+            z_order,
+            &asset_server));
         z_order += 0.1;
     }
 
@@ -91,10 +75,4 @@ fn setup(
         })
         .insert(AnimationTimer::new(Timer::from_seconds(0.1, true)));
     z_order += 0.1;
-
-    // Boundaries
-    commands.spawn_bundle(BoundaryBundle::new(BoundaryLocation::Left));
-    commands.spawn_bundle(BoundaryBundle::new(BoundaryLocation::Right));
-    commands.spawn_bundle(BoundaryBundle::new(BoundaryLocation::Lower));
-    commands.spawn_bundle(BoundaryBundle::new(BoundaryLocation::Upper));
 }

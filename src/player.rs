@@ -21,11 +21,13 @@ pub struct CollisionEvent;
 
 pub fn move_player(
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<&mut Transform, With<Player>>,
-    collider_query: Query<(&Transform), (With<Collider>, Without<Player>)>,
+    mut player_query: Query<&mut Transform, With<Player>>,
+    mut camera_query: Query<&mut Transform, (With<Camera>, Without<Player>)>,
+    collider_query: Query<(&Transform), (With<Collider>, Without<Player>, Without<Camera>)>,
     mut collision_events: EventWriter<CollisionEvent>,
 ) {
-    let mut player_transform = query.single_mut();
+    let mut player_transform = player_query.single_mut();
+    let mut camera_transform = camera_query.single_mut();
 
     // Generate new X position of the Player based on KeyCode input
     let mut direction_x = 0.0;
@@ -81,10 +83,12 @@ pub fn move_player(
 
     if !x_collided {
         player_transform.translation.x = new_player_position_x;
+        camera_transform.translation.x = new_player_position_x;
     }
 
     if !y_collided {
         player_transform.translation.y = new_player_position_y;
+        camera_transform.translation.y = new_player_position_y;
     }
 }
 
