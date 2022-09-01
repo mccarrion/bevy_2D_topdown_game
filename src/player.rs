@@ -38,7 +38,7 @@ pub fn move_player(
         direction_x += 1.0;
     }
     let new_player_position_x = player_transform.translation.x + direction_x * PLAYER_SPEED * TIME_STEP;
-    let future_x_position: Vec3 = const_vec3!([new_player_position_x, 0.0, 0.0]);
+    let future_x_position: Vec3 = const_vec3!([new_player_position_x, player_transform.translation.y, 0.0]);
 
     // Generate new Y position of the Player based on KeyCode input
     let mut direction_y = 0.0;
@@ -49,7 +49,7 @@ pub fn move_player(
         direction_y -= 1.0;
     }
     let new_player_position_y = player_transform.translation.y + direction_y * PLAYER_SPEED * TIME_STEP;
-    let future_y_position: Vec3 = const_vec3!([0.0, new_player_position_y, 0.0]);
+    let future_y_position: Vec3 = const_vec3!([player_transform.translation.x, new_player_position_y, 0.0]);
 
     let player_size = player_transform.scale.truncate();
 

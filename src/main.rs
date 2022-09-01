@@ -12,7 +12,7 @@ use bevy::{
 };
 use crate::boundary::*;
 use crate::global::*;
-use crate::map::MapBundle;
+use crate::map::*;
 use crate::player::*;
 
 fn main() {
