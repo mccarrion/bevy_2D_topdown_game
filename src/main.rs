@@ -2,6 +2,7 @@ pub mod player;
 pub mod boundary;
 pub mod global;
 pub mod map;
+pub mod tileset;
 
 use std::fs;
 use std::path::Path;
