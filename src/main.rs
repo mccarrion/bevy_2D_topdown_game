@@ -15,6 +15,7 @@ use crate::boundary::*;
 use crate::global::*;
 use crate::map::*;
 use crate::player::*;
+use crate::tileset::*;
 
 fn main() {
     App::new()
@@ -44,14 +45,17 @@ fn setup(
     let mut z_order: f32 = 0.0;
 
     // Map
-    let map_paths = fs::read_dir("./assets/output/map/").unwrap();
-    for map_path in map_paths {
-        commands.spawn_bundle(MapBundle::new(
-            map_path.unwrap(),
-            z_order,
-            &asset_server));
-        z_order += 0.1;
-    }
+    // let map_paths = fs::read_dir("./assets/output/map/").unwrap();
+    // for map_path in map_paths {
+    //     commands.spawn_bundle(MapBundle::new(
+    //         map_path.unwrap(),
+    //         z_order,
+    //         &asset_server));
+    //     z_order += 0.1;
+    // }
+
+    // TileSet
+    generate_map_from_tiled_config(&asset_server, &texture_atlases);
 
     // Player
     let texture_handle = asset_server

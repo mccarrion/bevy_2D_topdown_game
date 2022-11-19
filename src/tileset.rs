@@ -1,5 +1,9 @@
 use std::collections::HashMap;
 use std::fs;
+use bevy::{
+    core::FixedTimestep,
+    prelude::*,
+};
 use image::{DynamicImage, GenericImage, ImageBuffer};
 use serde::*;
 use serde_json::*;
@@ -67,9 +71,12 @@ pub struct TileLayer {
  * This method generates a series of PNG files corresponding to various layers defined
  * by the main Tiled config file
  */
-pub fn generate_map_from_tiled_config() {
+pub fn generate_map_from_tiled_config(
+    asset_server: &Res<AssetServer>,
+    mut texture_atlases: &ResMut<Assets<TextureAtlas>>
+) {
     // Generate TileMap struct from JSON file, the ".tmj" file
-    let tilemap_data = fs::read_to_string("../assets/tiled/maps/sprout_land.tmj");
+    let tilemap_data = fs::read_to_string("assets/tiled/maps/sprout_land.tmj");
     let tilemap: TileMap = from_str(&tilemap_data.unwrap()).unwrap();
 
     // Extract data necessary to generate map layers from TileMap struct
@@ -82,48 +89,68 @@ pub fn generate_map_from_tiled_config() {
     let tile_map: HashMap<i16, DynamicImage> = map_tile_to_gid(
         tilesetids,
         tilewidth,
-        tileheight);
+        tileheight,
+        asset_server,
+        texture_atlases);
 
     // Draw layers of the TileMap based on the Tiled JSON config
-    draw_tile_layers(tile_map, layers, tilewidth, tileheight);
+    // draw_tile_layers(tile_map, layers, tilewidth, tileheight);
 }
 
 pub fn map_tile_to_gid(
     tilesetids: Vec<TileSetId>,
     tilewidth: i16,
     tileheight: i16,
+    asset_server: &Res<AssetServer>,
+    mut texture_atlases: &ResMut<Assets<TextureAtlas>>
 ) -> HashMap<i16, DynamicImage> {
     let mut tile_map: HashMap<i16, DynamicImage> = HashMap::new();
     for tilesetid in tilesetids {
         let str: String = String::from(&tilesetid.source);
-        let tileset_json_dir: String = str.replace("..", "../assets/tiled");
+        let tileset_json_dir: String = str.replace("..", "assets/tiled");
         let tileset_data: String = fs::read_to_string(tileset_json_dir).unwrap();
         let tileset: TileSet = from_str(&tileset_data).unwrap();
         let dir: String = String::from(&tileset.image);
-        let tileset_img_dir: String = dir.replace("../..", "../assets");
-        let mut img: DynamicImage = image::open(tileset_img_dir).unwrap();
+        let tileset_img_dir: String = dir.replace("../..", "assets");
+        // let mut img: DynamicImage = image::open(tileset_img_dir).unwrap();
         let tile_quantity: i16 = tileset.tilecount;
         let mut col: i16 = 0;
         let mut row: i16 = 0;
         let mut tile_id = tilesetid.firstgid;
         let columns: i16 = tileset.columns;
 
+        // let texture_handle: Handle<Image> = asset_server
+        //     .load(tileset_img_dir);
+        // let texture_atlas = TextureAtlas::from_grid(
+        //     texture_handle,
+        //     Vec2::new(50.0, 50.0),
+        //     4,
+        //     4);
+        // let texture_atlas_handle = texture_atlases.add(texture_atlas);
+        //
+        // let bundle = SpriteSheetBundle {
+        //     texture_atlas: texture_atlas_handle,
+        //     ..default()
+        // };
+        // let mut sprite: TextureAtlasSprite = bundle.sprite;
+        // sprite.index = 2;
+
         // This loop maps all tiles to their gid assigned by Tiled
         for n in 1..(tile_quantity + 1) {
-            let x_offset: u32 = (tilewidth * col) as u32;
-            let y_offset: u32 = (tileheight * row) as u32;
-            let tile_img: DynamicImage = img.crop(
-                x_offset,
-                y_offset,
-                tileheight as u32,
-                tileheight as u32);
-            col += 1;
-            if n % columns == 0 {
-                col = 0;
-                row += 1;
-            }
-            tile_map.insert(tile_id, tile_img);
-            tile_id += 1;
+            // let x_offset: u32 = (tilewidth * col) as u32;
+            // let y_offset: u32 = (tileheight * row) as u32;
+            // let tile_img: DynamicImage = img.crop(
+            //     x_offset,
+            //     y_offset,
+            //     tileheight as u32,
+            //     tileheight as u32);
+            // col += 1;
+            // if n % columns == 0 {
+            //     col = 0;
+            //     row += 1;
+            // }
+            // tile_map.insert(tile_id, tile_img);
+            // tile_id += 1;
         }
     }
     return tile_map;
