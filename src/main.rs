@@ -55,7 +55,7 @@ fn setup(
     // }
 
     // TileSet
-    generate_map_from_tiled_config(&asset_server, &texture_atlases);
+    generate_map_from_tiled_config(&asset_server);
 
     // Player
     let texture_handle = asset_server

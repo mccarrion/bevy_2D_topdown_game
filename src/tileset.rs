@@ -72,9 +72,8 @@ pub struct TileLayer {
  * by the main Tiled config file
  */
 pub fn generate_map_from_tiled_config(
-    asset_server: &Res<AssetServer>,
-    mut texture_atlases: &ResMut<Assets<TextureAtlas>>
-) {
+    asset_server: &Res<AssetServer>
+) -> HashMap<i16, TextureAtlas> {
     // Generate TileMap struct from JSON file, the ".tmj" file
     let tilemap_data = fs::read_to_string("assets/tiled/maps/sprout_land.tmj");
     let tilemap: TileMap = from_str(&tilemap_data.unwrap()).unwrap();
@@ -86,12 +85,13 @@ pub fn generate_map_from_tiled_config(
     let tileheight: i16 = tilemap.tileheight;
 
     // Create a map that maps each tile gid to a png of the tile itself
-    let tile_map: HashMap<i16, DynamicImage> = map_tile_to_gid(
+    let tile_map: HashMap<i16, TextureAtlas> = map_tile_to_gid(
         tilesetids,
         tilewidth,
         tileheight,
-        asset_server,
-        texture_atlases);
+        asset_server);
+
+    return tile_map;
 
     // Draw layers of the TileMap based on the Tiled JSON config
     // draw_tile_layers(tile_map, layers, tilewidth, tileheight);
@@ -102,9 +102,8 @@ pub fn map_tile_to_gid(
     tilewidth: i16,
     tileheight: i16,
     asset_server: &Res<AssetServer>,
-    mut texture_atlases: &ResMut<Assets<TextureAtlas>>
-) -> HashMap<i16, DynamicImage> {
-    let mut tile_map: HashMap<i16, DynamicImage> = HashMap::new();
+) -> HashMap<i16, TextureAtlas> {
+    let mut tile_map: HashMap<i16, TextureAtlas> = HashMap::new();
     for tilesetid in tilesetids {
         let str: String = String::from(&tilesetid.source);
         let tileset_json_dir: String = str.replace("..", "assets/tiled");
@@ -113,20 +112,23 @@ pub fn map_tile_to_gid(
         let dir: String = String::from(&tileset.image);
         let tileset_img_dir: String = dir.replace("../..", "assets");
         // let mut img: DynamicImage = image::open(tileset_img_dir).unwrap();
-        let tile_quantity: i16 = tileset.tilecount;
+        let tile_quantity: usize = tileset.tilecount as usize;
         let mut col: i16 = 0;
         let mut row: i16 = 0;
         let mut tile_id = tilesetid.firstgid;
-        let columns: i16 = tileset.columns;
+        let columns: usize = tileset.columns as usize;
+        let rows: usize = tile_quantity / columns;
 
-        // let texture_handle: Handle<Image> = asset_server
-        //     .load(tileset_img_dir);
-        // let texture_atlas = TextureAtlas::from_grid(
-        //     texture_handle,
-        //     Vec2::new(50.0, 50.0),
-        //     4,
-        //     4);
-        // let texture_atlas_handle = texture_atlases.add(texture_atlas);
+        let texture_handle: Handle<Image> = asset_server
+            .load(&tileset_img_dir);
+        let texture_atlas = TextureAtlas::from_grid(
+            texture_handle,
+            Vec2::new(
+                tileset.tileheight as f32,
+                tileset.tilewidth as f32),
+            columns,
+            rows);
+        tile_map.insert(tile_id, texture_atlas);
         //
         // let bundle = SpriteSheetBundle {
         //     texture_atlas: texture_atlas_handle,
