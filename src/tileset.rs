@@ -110,7 +110,7 @@ pub fn map_tile_to_gid(
         let tileset_data: String = fs::read_to_string(tileset_json_dir).unwrap();
         let tileset: TileSet = from_str(&tileset_data).unwrap();
         let dir: String = String::from(&tileset.image);
-        let tileset_img_dir: String = dir.replace("../..", "assets");
+        let tileset_img_dir: String = dir.replace("../../", "");
         // let mut img: DynamicImage = image::open(tileset_img_dir).unwrap();
         let tile_quantity: usize = tileset.tilecount as usize;
         let mut col: i16 = 0;

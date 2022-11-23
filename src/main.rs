@@ -4,6 +4,7 @@ pub mod global;
 pub mod map;
 pub mod tileset;
 
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
@@ -55,7 +56,7 @@ fn setup(
     // }
 
     // TileSet
-    generate_map_from_tiled_config(&asset_server);
+    let texture_atlas_map: HashMap<i16, TextureAtlas> = generate_map_from_tiled_config(&asset_server);
 
     // Player
     let texture_handle = asset_server
