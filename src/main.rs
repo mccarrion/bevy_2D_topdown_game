@@ -56,7 +56,15 @@ fn setup(
     // }
 
     // TileSet
-    let texture_atlas_map: HashMap<i16, TextureAtlas> = generate_map_from_tiled_config(&asset_server);
+    let texture_atlas_map: HashMap<i16, TextureAtlas> = map_texture_atlas_to_gid(&asset_server);
+
+    let mut atlas_handles_map: HashMap<i16, Handle<TextureAtlas>> = HashMap::new();
+    for (gid, texture_atlas) in texture_atlas_map {
+        let atlas_handle = texture_atlases.add(texture_atlas);
+        atlas_handles_map.insert(gid, atlas_handle);
+    }
+
+    map_tile_to_id(texture_atlas_map, atlas_handles_map);
 
     // Player
     let texture_handle = asset_server
