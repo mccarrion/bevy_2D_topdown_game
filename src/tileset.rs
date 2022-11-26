@@ -5,9 +5,10 @@ use bevy::{
     core::FixedTimestep,
     prelude::*,
 };
-use image::{DynamicImage, GenericImage, ImageBuffer};
 use serde::*;
 use serde_json::*;
+use crate::boundary::Collider;
+use crate::player::PLAYER_SIZE;
 
 #[derive(Serialize, Deserialize)]
 pub struct TileSet {
@@ -68,6 +69,7 @@ pub struct TileLayer {
     y: i16,
 }
 
+#[derive(Clone)]
 pub struct TileSprite {
     pub atlas_handle: Handle<TextureAtlas>,
     pub atlas_sprite: TextureAtlasSprite
@@ -110,8 +112,9 @@ pub fn map_texture_atlas_to_gid(
     return tile_map;
 }
 
-pub fn draw_map(
-    tile_map: HashMap<i16, DynamicImage>,
+pub fn spawn_map(
+    mut commands: &mut Commands,
+    mut atlas_to_sprite_map: HashMap<usize, TileSprite>,
 ) {
     // Generate TileMap struct from JSON file, the ".tmj" file
     let tilemap_data = fs::read_to_string("assets/tiled/maps/sprout_land.tmj");
@@ -125,23 +128,28 @@ pub fn draw_map(
         let rows: i16 = layer.height;
 
         // width and height of png file to draw
-        let imgx = (tilewidth * columns) as u32;
-        let imgy = (tileheight * rows) as u32;
-        let mut img = ImageBuffer::new(imgx, imgy);
         let mut count: i16 = 1;
         let mut col: i16 = 1;
         let mut row: i16 = 1;
-        let filename: String = String::from(layer.name) + ".png";
 
         // This draws the map based on the tile gid and tile location defined by both the data
         // vec and map width and height from the tmj file
         for n in data {
             if n != 0 {
-                let tile = tile_map.get(&n).unwrap();
-                img.copy_from(tile,
-                              ((col - 1) * tilewidth) as u32,
-                              ((row - 1) * tileheight) as u32)
-                    .expect("Error copying tile to DynamicImage");
+                let tile_sprite: TileSprite = atlas_to_sprite_map.remove(&(n as usize)).unwrap();
+                atlas_to_sprite_map.insert(n as usize, tile_sprite.clone());
+                commands.spawn().insert_bundle(SpriteSheetBundle {
+                    transform: Transform {
+                        translation: Vec3::new(((col - 1) * tilewidth * PLAYER_SIZE.x as i16) as f32,
+                                               ((row - 1) * tileheight * PLAYER_SIZE.y as i16) as f32,
+                                               0.0),
+                        scale: PLAYER_SIZE,
+                        ..default()
+                    },
+                    texture_atlas: tile_sprite.atlas_handle,
+                    sprite: tile_sprite.atlas_sprite,
+                    ..default()
+                }).insert(Collider);
             }
             col += 1;
             if count % columns == 0 {
@@ -150,12 +158,5 @@ pub fn draw_map(
             }
             count += 1;
         }
-        let mut filepath: String = "../assets/output/map".to_owned();
-        fs::create_dir_all(&filepath)
-            .expect("Error creating directory for saving map layers");
-        filepath.push_str("/");
-        filepath.push_str(&filename);
-        img.save(filepath)
-            .expect("Error saving image");
     }
 }

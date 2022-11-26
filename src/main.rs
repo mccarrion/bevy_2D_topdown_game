@@ -59,6 +59,7 @@ fn setup(
             atlas_to_sprite_map.insert(gid as usize + n - 1, tile_sprite);
         }
     }
+    spawn_map(&mut commands, atlas_to_sprite_map);
 
     // Player
     let texture_handle = asset_server
