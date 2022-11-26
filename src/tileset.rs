@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::fs;
 use bevy::{
@@ -67,6 +68,11 @@ pub struct TileLayer {
     y: i16,
 }
 
+pub struct TileSprite {
+    pub atlas_handle: Handle<TextureAtlas>,
+    pub atlas_sprite: TextureAtlasSprite
+}
+
 pub fn map_texture_atlas_to_gid(
     asset_server: &Res<AssetServer>,
 ) -> HashMap<i16, TextureAtlas> {
@@ -104,49 +110,15 @@ pub fn map_texture_atlas_to_gid(
     return tile_map;
 }
 
-pub fn map_tile_to_id(
-    texture_atlas_map: HashMap<i16, TextureAtlas>,
-    atlas_handles_map: HashMap<i16, Handle<TextureAtlas>>
-) {
-
-    for (gid, atlas_handle) in atlas_handles_map {
-        let texture_atlas: TextureAtlas = texture_atlas_map.get(&gid).unwrap().clone();
-    }
-
-    // let sprite = SpriteSheetBundle {
-    //     texture_atlas: texture_handle,
-    //     sprite: TextureAtlasSprite::new(0),
-    //     ..default()
-    // };
-
-    // This loop maps all tiles to their gid assigned by Tiled
-    // for n in 1..(tile_quantity + 1) {
-        // let x_offset: u32 = (tilewidth * col) as u32;
-        // let y_offset: u32 = (tileheight * row) as u32;
-        // let tile_img: DynamicImage = img.crop(
-        //     x_offset,
-        //     y_offset,
-        //     tileheight as u32,
-        //     tileheight as u32);
-        // col += 1;
-        // if n % columns == 0 {
-        //     col = 0;
-        //     row += 1;
-        // }
-        // tile_map.insert(tile_id, tile_img);
-        // tile_id += 1;
-    // }
-}
-
-pub fn draw_tile_layers(
+pub fn draw_map(
     tile_map: HashMap<i16, DynamicImage>,
-    layers: Vec<TileLayer>,
-    tilewidth: i16,
-    tileheight: i16,
 ) {
-    // let layers: Vec<TileLayer> = tilemap.layers;
-    // let tilewidth: i16 = tilemap.tilewidth;
-    // let tileheight: i16 = tilemap.tileheight;
+    // Generate TileMap struct from JSON file, the ".tmj" file
+    let tilemap_data = fs::read_to_string("assets/tiled/maps/sprout_land.tmj");
+    let tilemap: TileMap = from_str(&tilemap_data.unwrap()).unwrap();
+    let layers: Vec<TileLayer> = tilemap.layers;
+    let tilewidth: i16 = tilemap.tilewidth;
+    let tileheight: i16 = tilemap.tileheight;
     for layer in layers {
         let data: Vec<i16> = layer.data;
         let columns: i16 = layer.width;

@@ -45,26 +45,20 @@ fn setup(
     // Control render ordering
     let mut z_order: f32 = 0.0;
 
-    // Map
-    // let map_paths = fs::read_dir("./assets/output/map/").unwrap();
-    // for map_path in map_paths {
-    //     commands.spawn_bundle(MapBundle::new(
-    //         map_path.unwrap(),
-    //         z_order,
-    //         &asset_server));
-    //     z_order += 0.1;
-    // }
-
     // TileSet
     let texture_atlas_map: HashMap<i16, TextureAtlas> = map_texture_atlas_to_gid(&asset_server);
 
-    let mut atlas_handles_map: HashMap<i16, Handle<TextureAtlas>> = HashMap::new();
-    for (gid, texture_atlas) in texture_atlas_map {
-        let atlas_handle = texture_atlases.add(texture_atlas);
-        atlas_handles_map.insert(gid, atlas_handle);
+    let mut atlas_to_sprite_map: HashMap<usize, TileSprite> = HashMap::new();
+    for (gid, texture_atlas) in texture_atlas_map.clone() {
+        let atlas_handle = texture_atlases.add(texture_atlas.clone());
+        for n in 1..(texture_atlas.len() + 1) {
+            let tile_sprite = TileSprite {
+                atlas_handle: atlas_handle.clone(),
+                atlas_sprite: TextureAtlasSprite::new(n-1)
+            };
+            atlas_to_sprite_map.insert(gid as usize + n - 1, tile_sprite);
+        }
     }
-
-    map_tile_to_id(texture_atlas_map, atlas_handles_map);
 
     // Player
     let texture_handle = asset_server
