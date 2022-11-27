@@ -1,9 +1,10 @@
 use bevy::{
     math::{const_vec3},
     prelude::*,
+    sprite::collide_aabb::{collide, Collision},
 };
-use crate::game::global::TIME_STEP;
-use crate::game::boundary::*;
+use crate::global::TIME_STEP;
+use crate::boundary::*;
 
 // Player constants
 pub const PLAYER_SIZE: Vec3 = const_vec3!([3.0, 3.0, 0.0]);
@@ -15,13 +16,20 @@ pub const STARTING_X: f32 = 0.0;
 #[derive(Component)]
 pub struct Player;
 
+#[derive(Default)]
+pub struct CollisionEvent;
+
 pub fn move_player(
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<&mut Transform, With<Player>>
+    mut player_query: Query<&mut Transform, With<Player>>,
+    mut camera_query: Query<&mut Transform, (With<Camera>, Without<Player>)>,
+    collider_query: Query<(&Transform), (With<Collider>, Without<Player>, Without<Camera>)>,
+    mut collision_events: EventWriter<CollisionEvent>,
 ) {
-    let mut player_transform = query.single_mut();
+    let mut player_transform = player_query.single_mut();
+    let mut camera_transform = camera_query.single_mut();
 
-    // Update X position of the Player
+    // Generate new X position of the Player based on KeyCode input
     let mut direction_x = 0.0;
     if keyboard_input.pressed(KeyCode::Left) {
         direction_x -= 1.0;
@@ -30,11 +38,9 @@ pub fn move_player(
         direction_x += 1.0;
     }
     let new_player_position_x = player_transform.translation.x + direction_x * PLAYER_SPEED * TIME_STEP;
-    let left_bound = LEFT_BOUND + WALL_THICKNESS / 2.0 + PLAYER_SIZE.x / 2.0 + PLAYER_PADDING;
-    let right_bound = RIGHT_BOUND - WALL_THICKNESS / 2.0 - PLAYER_SIZE.x / 2.0 - PLAYER_PADDING;
-    player_transform.translation.x = new_player_position_x.clamp(left_bound, right_bound);
+    let future_x_position: Vec3 = const_vec3!([new_player_position_x, player_transform.translation.y, 0.0]);
 
-    // Update Y position of the Player
+    // Generate new Y position of the Player based on KeyCode input
     let mut direction_y = 0.0;
     if keyboard_input.pressed(KeyCode::Up) {
         direction_y += 1.0;
@@ -43,16 +49,54 @@ pub fn move_player(
         direction_y -= 1.0;
     }
     let new_player_position_y = player_transform.translation.y + direction_y * PLAYER_SPEED * TIME_STEP;
-    let lower_bound = LOWER_BOUND + WALL_THICKNESS / 2.0 + PLAYER_SIZE.y / 2.0 + PLAYER_PADDING;
-    let upper_bound = UPPER_BOUND - WALL_THICKNESS / 2.0 - PLAYER_SIZE.y / 2.0 - PLAYER_PADDING;
-    player_transform.translation.y = new_player_position_y.clamp(lower_bound, upper_bound);
+    let future_y_position: Vec3 = const_vec3!([player_transform.translation.x, new_player_position_y, 0.0]);
+
+    let player_size = player_transform.scale.truncate();
+
+    let mut x_collided = false;
+    let mut y_collided = false;
+
+    for (transform) in collider_query.iter() {
+
+        let collision_x = collide(
+            future_x_position,
+            player_size,
+            transform.translation,
+            transform.scale.truncate(),
+        );
+        if let Some(_collision_x) = collision_x {
+            collision_events.send_default();
+            x_collided = true;
+        }
+
+        let collision_y = collide(
+            future_y_position,
+            player_size,
+            transform.translation,
+            transform.scale.truncate(),
+        );
+        if let Some(_collision_y) = collision_y {
+            collision_events.send_default();
+            y_collided = true;
+        }
+    }
+
+    if !x_collided {
+        player_transform.translation.x = new_player_position_x;
+        camera_transform.translation.x = new_player_position_x;
+    }
+
+    if !y_collided {
+        player_transform.translation.y = new_player_position_y;
+        camera_transform.translation.y = new_player_position_y;
+    }
 }
 
 #[derive(Component, Deref, DerefMut)]
 pub struct AnimationTimer(Timer);
 
 impl AnimationTimer {
-    pub fn new (timer: Timer) -> AnimationTimer {
+    pub fn new(timer: Timer) -> AnimationTimer {
         AnimationTimer(timer)
     }
 }

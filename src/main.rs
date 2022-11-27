@@ -1,26 +1,33 @@
-mod game;
+pub mod player;
+pub mod boundary;
+pub mod global;
+pub mod map;
+pub mod tileset;
 
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
-use game::boundary::*;
-use game::global::*;
-use game::player::*;
 
 use bevy::{
     core::FixedTimestep,
     prelude::*,
 };
+use crate::boundary::*;
+use crate::global::*;
+use crate::map::*;
+use crate::player::*;
+use crate::tileset::*;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .add_startup_system(setup)
+        .add_event::<CollisionEvent>()
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
                 .with_system(move_player)
-                .with_system(move_camera)
                 .with_system(animate_player_sprite)
         )
         .add_system(bevy::input::system::exit_on_esc_system)
@@ -34,6 +41,25 @@ fn setup(
 ) {
     // Camera
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+
+    // Control render ordering
+    let mut z_order: f32 = 0.0;
+
+    // TileSet
+    let texture_atlas_map: HashMap<i16, TextureAtlas> = map_texture_atlas_to_gid(&asset_server);
+
+    let mut atlas_to_sprite_map: HashMap<usize, TileSprite> = HashMap::new();
+    for (gid, texture_atlas) in texture_atlas_map.clone() {
+        let atlas_handle = texture_atlases.add(texture_atlas.clone());
+        for n in 1..(texture_atlas.len() + 1) {
+            let tile_sprite = TileSprite {
+                atlas_handle: atlas_handle.clone(),
+                atlas_sprite: TextureAtlasSprite::new(n-1)
+            };
+            atlas_to_sprite_map.insert(gid as usize + n - 1, tile_sprite);
+        }
+    }
+    spawn_map(&mut commands, atlas_to_sprite_map);
 
     // Player
     let texture_handle = asset_server
@@ -49,44 +75,13 @@ fn setup(
         .insert(Player)
         .insert_bundle(SpriteSheetBundle {
             transform: Transform {
-                translation: Vec3::new(STARTING_X, STARTING_Y, 0.0),
+                translation: Vec3::new(STARTING_X, STARTING_Y, z_order),
                 scale: PLAYER_SIZE,
                 ..default()
             },
             texture_atlas: texture_atlas_handle,
             ..default()
         })
-        .insert(AnimationTimer::new(Timer::from_seconds(0.1, true)))
-        .insert(Collider);
-
-    // Map
-    #[derive(Component)]
-    pub struct MapLayer;
-    let map_paths = fs::read_dir("./assets/output/map/").unwrap();
-    for map_path in map_paths {
-        let path = map_path.unwrap()
-            .path()
-            .display()
-            .to_string()
-            .replace("./assets/", "");
-        let layer_path = Path::new(&path);
-        let background_texture_handle = asset_server.load(layer_path);
-        commands
-            .spawn()
-            .insert(MapLayer)
-            .insert_bundle(SpriteBundle {
-                texture: background_texture_handle,
-                transform: Transform {
-                    scale: PLAYER_SIZE,
-                    ..default()
-                },
-                ..Default::default()
-            });
-    }
-
-    // Boundaries
-    commands.spawn_bundle(BoundaryBundle::new(BoundaryLocation::Left));
-    commands.spawn_bundle(BoundaryBundle::new(BoundaryLocation::Right));
-    commands.spawn_bundle(BoundaryBundle::new(BoundaryLocation::Lower));
-    commands.spawn_bundle(BoundaryBundle::new(BoundaryLocation::Upper));
+        .insert(AnimationTimer::new(Timer::from_seconds(0.1, true)));
+    z_order += 0.1;
 }
