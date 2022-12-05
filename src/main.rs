@@ -76,7 +76,7 @@ fn setup(
         .insert_bundle(SpriteSheetBundle {
             transform: Transform {
                 translation: Vec3::new(STARTING_X, STARTING_Y, z_order),
-                scale: PLAYER_SIZE,
+                scale: Vec3::splat(PLAYER_SIZE),
                 ..default()
             },
             texture_atlas: texture_atlas_handle,

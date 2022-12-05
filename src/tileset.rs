@@ -112,6 +112,10 @@ pub fn map_texture_atlas_to_gid(
     return tile_map;
 }
 
+
+#[derive(Component)]
+pub struct MapLayer;
+
 pub fn spawn_map(
     mut commands: &mut Commands,
     mut atlas_to_sprite_map: HashMap<usize, TileSprite>,
@@ -134,22 +138,24 @@ pub fn spawn_map(
 
         // This draws the map based on the tile gid and tile location defined by both the data
         // vec and map width and height from the tmj file
+        let mut tile_vec: Vec<Entity> = Vec::new();
         for n in data {
             if n != 0 {
                 let tile_sprite: TileSprite = atlas_to_sprite_map.remove(&(n as usize)).unwrap();
                 atlas_to_sprite_map.insert(n as usize, tile_sprite.clone());
-                commands.spawn().insert_bundle(SpriteSheetBundle {
+                let tile_sprite = commands.spawn_bundle(SpriteSheetBundle {
                     transform: Transform {
-                        translation: Vec3::new(((col - 1) * tilewidth * PLAYER_SIZE.x as i16) as f32,
-                                               ((row - 1) * tileheight * PLAYER_SIZE.y as i16) as f32,
+                        translation: Vec3::new(((col - 1) * tilewidth * PLAYER_SIZE as i16) as f32,
+                                               ((row - 1) * tileheight * PLAYER_SIZE as i16) as f32,
                                                0.0),
-                        scale: PLAYER_SIZE,
+                        scale: Vec3::splat(PLAYER_SIZE),
                         ..default()
                     },
                     texture_atlas: tile_sprite.atlas_handle,
                     sprite: tile_sprite.atlas_sprite,
                     ..default()
-                }).insert(Collider);
+                }).insert(Collider).id();
+                tile_vec.push(tile_sprite);
             }
             col += 1;
             if count % columns == 0 {
@@ -158,5 +164,10 @@ pub fn spawn_map(
             }
             count += 1;
         }
+        commands.spawn()
+            .insert(Transform::default())
+            .insert(GlobalTransform::default())
+            .insert(MapLayer)
+            .push_children(&tile_vec);
     }
 }

@@ -36,7 +36,7 @@ impl MapBundle {
                 texture: background_texture_handle,
                 transform: Transform {
                     translation: Vec3::new(0.0, 0.0, z_order),
-                    scale: PLAYER_SIZE,
+                    scale: Vec3::splat(PLAYER_SIZE),
                     ..default()
                 },
                 ..Default::default()

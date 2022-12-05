@@ -7,7 +7,7 @@ use crate::global::TIME_STEP;
 use crate::boundary::*;
 
 // Player constants
-pub const PLAYER_SIZE: Vec3 = const_vec3!([3.0, 3.0, 0.0]);
+pub const PLAYER_SIZE: f32 = 3.0;
 pub const PLAYER_SPEED: f32 = 700.0;
 pub const PLAYER_PADDING: f32 = 10.0;
 pub const STARTING_Y: f32 = 0.0;
@@ -60,9 +60,9 @@ pub fn move_player(
 
         let collision_x = collide(
             future_x_position,
-            player_size,
+            Vec2::splat(PLAYER_SIZE * 4.0),
             transform.translation,
-            transform.scale.truncate(),
+            Vec2::splat(PLAYER_SIZE * 4.0),
         );
         if let Some(_collision_x) = collision_x {
             collision_events.send_default();
@@ -71,9 +71,9 @@ pub fn move_player(
 
         let collision_y = collide(
             future_y_position,
-            player_size,
+            Vec2::splat(PLAYER_SIZE * 4.0),
             transform.translation,
-            transform.scale.truncate(),
+            Vec2::splat(PLAYER_SIZE * 4.0),
         );
         if let Some(_collision_y) = collision_y {
             collision_events.send_default();
