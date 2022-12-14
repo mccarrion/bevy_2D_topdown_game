@@ -28,10 +28,10 @@ pub struct TileSet {
     version: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Eq, Hash, PartialEq, Clone)]
 pub struct TileSetId {
-    firstgid: i16,
-    source: String,
+    pub firstgid: i16,
+    pub source: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -77,7 +77,7 @@ pub struct TileSprite {
 
 pub fn map_texture_atlas_to_gid(
     asset_server: &Res<AssetServer>,
-) -> HashMap<i16, TextureAtlas> {
+) -> HashMap<TileSetId, TextureAtlas> {
     // Generate TileMap struct from JSON file, the ".tmj" file
     let tilemap_data = fs::read_to_string("assets/tiled/maps/sprout_land.tmj");
     let tilemap: TileMap = from_str(&tilemap_data.unwrap()).unwrap();
@@ -85,7 +85,7 @@ pub fn map_texture_atlas_to_gid(
     // Extract data necessary to generate map layers from TileMap struct
     let tilesetids: Vec<TileSetId> = tilemap.tilesets;
 
-    let mut tile_map: HashMap<i16, TextureAtlas> = HashMap::new();
+    let mut tile_map: HashMap<TileSetId, TextureAtlas> = HashMap::new();
     for tilesetid in tilesetids {
         let str: String = String::from(&tilesetid.source);
         let tileset_json_dir: String = str.replace("..", "assets/tiled");
@@ -107,7 +107,7 @@ pub fn map_texture_atlas_to_gid(
                 tileset.tilewidth as f32),
             columns,
             rows);
-        tile_map.insert(tile_id, texture_atlas);
+        tile_map.insert(tilesetid, texture_atlas);
     }
     return tile_map;
 }

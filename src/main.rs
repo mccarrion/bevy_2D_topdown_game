@@ -46,17 +46,17 @@ fn setup(
     let mut z_order: f32 = 0.0;
 
     // TileSet
-    let texture_atlas_map: HashMap<i16, TextureAtlas> = map_texture_atlas_to_gid(&asset_server);
+    let texture_atlas_map: HashMap<TileSetId, TextureAtlas> = map_texture_atlas_to_gid(&asset_server);
 
     let mut atlas_to_sprite_map: HashMap<usize, TileSprite> = HashMap::new();
-    for (gid, texture_atlas) in texture_atlas_map.clone() {
+    for (tilesetid, texture_atlas) in texture_atlas_map.clone() {
         let atlas_handle = texture_atlases.add(texture_atlas.clone());
         for n in 1..(texture_atlas.len() + 1) {
             let tile_sprite = TileSprite {
                 atlas_handle: atlas_handle.clone(),
                 atlas_sprite: TextureAtlasSprite::new(n-1)
             };
-            atlas_to_sprite_map.insert(gid as usize + n - 1, tile_sprite);
+            atlas_to_sprite_map.insert(tilesetid.firstgid as usize + n - 1, tile_sprite);
         }
     }
     spawn_map(&mut commands, atlas_to_sprite_map);
