@@ -69,10 +69,23 @@ pub struct TileLayer {
     y: i16,
 }
 
-#[derive(Clone)]
+#[derive(Serialize, Deserialize)]
+pub struct TileMetadata {
+    id: i16,
+    pub left: bool,
+    pub right: bool,
+    pub top: bool,
+    pub bottom: bool,
+}
+
+#[derive(Component, Clone)]
 pub struct TileSprite {
     pub atlas_handle: Handle<TextureAtlas>,
-    pub atlas_sprite: TextureAtlasSprite
+    pub atlas_sprite: TextureAtlasSprite,
+    pub left: bool,
+    pub right: bool,
+    pub top: bool,
+    pub bottom: bool,
 }
 
 pub fn map_texture_atlas_to_gid(

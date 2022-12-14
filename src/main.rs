@@ -12,6 +12,7 @@ use bevy::{
     core::FixedTimestep,
     prelude::*,
 };
+use serde_json::from_str;
 use crate::boundary::*;
 use crate::global::*;
 use crate::map::*;
@@ -51,10 +52,22 @@ fn setup(
     let mut atlas_to_sprite_map: HashMap<usize, TileSprite> = HashMap::new();
     for (tilesetid, texture_atlas) in texture_atlas_map.clone() {
         let atlas_handle = texture_atlases.add(texture_atlas.clone());
+
+        let str: String = String::from(&tilesetid.source);
+
+        let metadata_json_dir: String = str.replace("../tilesets", "assets/tiled/metadata");
+        let metadata_json: String = fs::read_to_string(metadata_json_dir).unwrap();
+        let mut metadata_vec: Vec<TileMetadata> = from_str(&metadata_json).unwrap();
+
         for n in 1..(texture_atlas.len() + 1) {
+            let metadata: &TileMetadata = metadata_vec.get(n - 1).clone().unwrap();
             let tile_sprite = TileSprite {
                 atlas_handle: atlas_handle.clone(),
-                atlas_sprite: TextureAtlasSprite::new(n-1)
+                atlas_sprite: TextureAtlasSprite::new(n - 1),
+                left: metadata.left,
+                right: metadata.right,
+                top: metadata.top,
+                bottom: metadata.bottom,
             };
             atlas_to_sprite_map.insert(tilesetid.firstgid as usize + n - 1, tile_sprite);
         }
