@@ -149,13 +149,20 @@ pub fn spawn_map(
         let mut col: i16 = 1;
         let mut row: i16 = 1;
 
+        let mut atlas_to_sprite_map_copy: HashMap<usize, TileSprite> = atlas_to_sprite_map.clone();
+
         // This draws the map based on the tile gid and tile location defined by both the data
         // vec and map width and height from the tmj file
         let mut tile_vec: Vec<Entity> = Vec::new();
         for n in data {
             if n != 0 {
+
+                // TODO: review if calling .get() would work better
                 let tile_sprite: TileSprite = atlas_to_sprite_map.remove(&(n as usize)).unwrap();
+                let tile_sprite_copy: TileSprite = atlas_to_sprite_map_copy.remove(&(n as usize)).unwrap();
                 atlas_to_sprite_map.insert(n as usize, tile_sprite.clone());
+                atlas_to_sprite_map_copy.insert(n as usize, tile_sprite_copy.clone());
+
                 let tile_sprite = commands.spawn_bundle(SpriteSheetBundle {
                     transform: Transform {
                         translation: Vec3::new(((col - 1) * tilewidth * PLAYER_SIZE as i16) as f32,
@@ -167,7 +174,7 @@ pub fn spawn_map(
                     texture_atlas: tile_sprite.atlas_handle,
                     sprite: tile_sprite.atlas_sprite,
                     ..default()
-                }).insert(Collider).id();
+                }).insert(Collider).insert(tile_sprite_copy).id();
                 tile_vec.push(tile_sprite);
             }
             col += 1;
