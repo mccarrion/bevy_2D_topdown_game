@@ -11,8 +11,8 @@ use crate::tileset::{TileMetadata, TileSprite};
 pub const PLAYER_SIZE: f32 = 3.0;
 pub const PLAYER_SPEED: f32 = 700.0;
 pub const PLAYER_PADDING: f32 = 10.0;
-pub const STARTING_Y: f32 = 0.0;
-pub const STARTING_X: f32 = -70.0;
+pub const STARTING_Y: f32 = 2500.0;
+pub const STARTING_X: f32 = 3000.0;
 
 #[derive(Component)]
 pub struct Player;
@@ -62,7 +62,7 @@ pub fn move_player(
             future_x_position,
             Vec2::splat(PLAYER_SIZE * 10.0),
             transform.translation,
-            Vec2::splat(PLAYER_SIZE * 10.0),
+            Vec2::splat(PLAYER_SIZE * 25.0),
         );
         if let Some(collision_x) = collision_x {
             match collision_x {
@@ -80,9 +80,9 @@ pub fn move_player(
 
         let collision_y = collide(
             future_y_position,
-            Vec2::splat(PLAYER_SIZE * 10.0),
+            Vec2::splat(PLAYER_SIZE * 15.0),
             transform.translation,
-            Vec2::splat(PLAYER_SIZE * 10.0),
+            Vec2::splat(PLAYER_SIZE * 15.0),
         );
 
         if let Some(collision_y) = collision_y {
