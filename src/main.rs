@@ -72,7 +72,7 @@ fn setup(
             atlas_to_sprite_map.insert(tilesetid.firstgid as usize + n - 1, tile_sprite);
         }
     }
-    spawn_map(&mut commands, atlas_to_sprite_map);
+    z_order = spawn_map(&mut commands, atlas_to_sprite_map, z_order);
 
     // Player
     let texture_handle = asset_server

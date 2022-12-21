@@ -4,6 +4,7 @@ use std::fs;
 use bevy::{
     core::FixedTimestep,
     prelude::*,
+    ecs::query::WorldQuery,
 };
 use serde::*;
 use serde_json::*;
@@ -132,7 +133,8 @@ pub struct MapLayer;
 pub fn spawn_map(
     mut commands: &mut Commands,
     mut atlas_to_sprite_map: HashMap<usize, TileSprite>,
-) {
+    mut z_order: f32,
+) -> f32 {
     // Generate TileMap struct from JSON file, the ".tmj" file
     let tilemap_data = fs::read_to_string("assets/tiled/maps/sprout_land.tmj");
     let tilemap: TileMap = from_str(&tilemap_data.unwrap()).unwrap();
@@ -167,7 +169,7 @@ pub fn spawn_map(
                     transform: Transform {
                         translation: Vec3::new(((col - 1) * tilewidth * PLAYER_SIZE as i16) as f32,
                                                ((row - 1) * tileheight * PLAYER_SIZE as i16) as f32,
-                                               0.0),
+                                               z_order),
                         scale: Vec3::splat(PLAYER_SIZE),
                         ..default()
                     },
@@ -184,10 +186,12 @@ pub fn spawn_map(
             }
             count += 1;
         }
+        z_order += 0.1;
         commands.spawn()
             .insert(Transform::default())
             .insert(GlobalTransform::default())
             .insert(MapLayer)
             .push_children(&tile_vec);
     }
+    return z_order;
 }
