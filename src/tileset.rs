@@ -82,7 +82,7 @@ pub struct TileMetadata {
 #[derive(Component, Clone)]
 pub struct TileSprite {
     pub atlas_handle: Handle<TextureAtlas>,
-    pub atlas_sprite: TextureAtlasSprite,
+    pub atlas_sprite_id: usize,
     pub left: bool,
     pub right: bool,
     pub top: bool,
@@ -148,8 +148,8 @@ pub fn spawn_map(
 
         // width and height of png file to draw
         let mut count: i16 = 1;
-        let mut col: i16 = 1;
-        let mut row: i16 = 1;
+        let mut col: i16 = 0;
+        let mut row: i16 = rows;
 
         let mut atlas_to_sprite_map_copy: HashMap<usize, TileSprite> = atlas_to_sprite_map.clone();
 
@@ -167,22 +167,22 @@ pub fn spawn_map(
 
                 let tile_sprite = commands.spawn_bundle(SpriteSheetBundle {
                     transform: Transform {
-                        translation: Vec3::new(((col - 1) * tilewidth * PLAYER_SIZE as i16) as f32,
-                                               ((row - 1) * tileheight * PLAYER_SIZE as i16) as f32,
+                        translation: Vec3::new((col * tilewidth * PLAYER_SIZE as i16) as f32,
+                                               (row * tileheight * PLAYER_SIZE as i16) as f32,
                                                z_order),
                         scale: Vec3::splat(PLAYER_SIZE),
                         ..default()
                     },
                     texture_atlas: tile_sprite.atlas_handle,
-                    sprite: tile_sprite.atlas_sprite,
+                    sprite: TextureAtlasSprite::new(tile_sprite.atlas_sprite_id),
                     ..default()
                 }).insert(Collider).insert(tile_sprite_copy).id();
                 tile_vec.push(tile_sprite);
             }
             col += 1;
             if count % columns == 0 {
-                col = 1;
-                row += 1;
+                col = 0;
+                row -= 1;
             }
             count += 1;
         }

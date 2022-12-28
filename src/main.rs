@@ -59,17 +59,17 @@ fn setup(
         let metadata_json: String = fs::read_to_string(metadata_json_dir).unwrap();
         let mut metadata_vec: Vec<TileMetadata> = from_str(&metadata_json).unwrap();
 
-        for n in 1..(texture_atlas.len() + 1) {
-            let metadata: &TileMetadata = metadata_vec.get(n - 1).clone().unwrap();
+        for n in 0..texture_atlas.len() {
+            let metadata: &TileMetadata = metadata_vec.get(n).clone().unwrap();
             let tile_sprite = TileSprite {
                 atlas_handle: atlas_handle.clone(),
-                atlas_sprite: TextureAtlasSprite::new(n - 1),
+                atlas_sprite_id: n,
                 left: metadata.left,
                 right: metadata.right,
                 top: metadata.top,
                 bottom: metadata.bottom,
             };
-            atlas_to_sprite_map.insert(tilesetid.firstgid as usize + n - 1, tile_sprite);
+            atlas_to_sprite_map.insert(tilesetid.firstgid as usize + n, tile_sprite);
         }
     }
     z_order = spawn_map(&mut commands, atlas_to_sprite_map, z_order);
