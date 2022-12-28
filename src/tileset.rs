@@ -1,13 +1,11 @@
-use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::fs;
 use bevy::{
-    core::FixedTimestep,
     prelude::*,
 };
 use serde::*;
 use serde_json::*;
-use crate::boundary::Collider;
+use crate::global::Collider;
 use crate::player::PLAYER_SIZE;
 
 #[derive(Serialize, Deserialize)]
@@ -28,10 +26,10 @@ pub struct TileSet {
     version: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Eq, Hash, PartialEq, Clone)]
 pub struct TileSetId {
-    firstgid: i16,
-    source: String,
+    pub firstgid: i16,
+    pub source: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -69,15 +67,28 @@ pub struct TileLayer {
     y: i16,
 }
 
-#[derive(Clone)]
+#[derive(Serialize, Deserialize)]
+pub struct TileMetadata {
+    id: i16,
+    pub left: bool,
+    pub right: bool,
+    pub top: bool,
+    pub bottom: bool,
+}
+
+#[derive(Component, Clone)]
 pub struct TileSprite {
     pub atlas_handle: Handle<TextureAtlas>,
-    pub atlas_sprite: TextureAtlasSprite
+    pub atlas_sprite_id: usize,
+    pub left: bool,
+    pub right: bool,
+    pub top: bool,
+    pub bottom: bool,
 }
 
 pub fn map_texture_atlas_to_gid(
     asset_server: &Res<AssetServer>,
-) -> HashMap<i16, TextureAtlas> {
+) -> HashMap<TileSetId, TextureAtlas> {
     // Generate TileMap struct from JSON file, the ".tmj" file
     let tilemap_data = fs::read_to_string("assets/tiled/maps/sprout_land.tmj");
     let tilemap: TileMap = from_str(&tilemap_data.unwrap()).unwrap();
@@ -85,7 +96,7 @@ pub fn map_texture_atlas_to_gid(
     // Extract data necessary to generate map layers from TileMap struct
     let tilesetids: Vec<TileSetId> = tilemap.tilesets;
 
-    let mut tile_map: HashMap<i16, TextureAtlas> = HashMap::new();
+    let mut tile_map: HashMap<TileSetId, TextureAtlas> = HashMap::new();
     for tilesetid in tilesetids {
         let str: String = String::from(&tilesetid.source);
         let tileset_json_dir: String = str.replace("..", "assets/tiled");
@@ -94,7 +105,6 @@ pub fn map_texture_atlas_to_gid(
         let dir: String = String::from(&tileset.image);
         let tileset_img_dir: String = dir.replace("../../", "");
         let tile_quantity: usize = tileset.tilecount as usize;
-        let mut tile_id = tilesetid.firstgid;
         let columns: usize = tileset.columns as usize;
         let rows: usize = tile_quantity / columns;
 
@@ -107,15 +117,20 @@ pub fn map_texture_atlas_to_gid(
                 tileset.tilewidth as f32),
             columns,
             rows);
-        tile_map.insert(tile_id, texture_atlas);
+        tile_map.insert(tilesetid, texture_atlas);
     }
     return tile_map;
 }
 
+
+#[derive(Component)]
+pub struct MapLayer;
+
 pub fn spawn_map(
-    mut commands: &mut Commands,
-    mut atlas_to_sprite_map: HashMap<usize, TileSprite>,
-) {
+    commands: &mut Commands,
+    atlas_to_sprite_map: HashMap<usize, TileSprite>,
+    mut z_order: f32,
+) -> f32 {
     // Generate TileMap struct from JSON file, the ".tmj" file
     let tilemap_data = fs::read_to_string("assets/tiled/maps/sprout_land.tmj");
     let tilemap: TileMap = from_str(&tilemap_data.unwrap()).unwrap();
@@ -129,34 +144,42 @@ pub fn spawn_map(
 
         // width and height of png file to draw
         let mut count: i16 = 1;
-        let mut col: i16 = 1;
-        let mut row: i16 = 1;
+        let mut col: i16 = 0;
+        let mut row: i16 = rows;
 
         // This draws the map based on the tile gid and tile location defined by both the data
         // vec and map width and height from the tmj file
+        let mut tile_vec: Vec<Entity> = Vec::new();
         for n in data {
             if n != 0 {
-                let tile_sprite: TileSprite = atlas_to_sprite_map.remove(&(n as usize)).unwrap();
-                atlas_to_sprite_map.insert(n as usize, tile_sprite.clone());
-                commands.spawn().insert_bundle(SpriteSheetBundle {
+                let tile_sprite: &TileSprite = atlas_to_sprite_map.get(&(n as usize)).unwrap();
+                let tile_sprite = commands.spawn_bundle(SpriteSheetBundle {
                     transform: Transform {
-                        translation: Vec3::new(((col - 1) * tilewidth * PLAYER_SIZE.x as i16) as f32,
-                                               ((row - 1) * tileheight * PLAYER_SIZE.y as i16) as f32,
-                                               0.0),
-                        scale: PLAYER_SIZE,
+                        translation: Vec3::new((col * tilewidth * PLAYER_SIZE as i16) as f32,
+                                               (row * tileheight * PLAYER_SIZE as i16) as f32,
+                                               z_order),
+                        scale: Vec3::splat(PLAYER_SIZE),
                         ..default()
                     },
-                    texture_atlas: tile_sprite.atlas_handle,
-                    sprite: tile_sprite.atlas_sprite,
+                    texture_atlas: tile_sprite.atlas_handle.clone(),
+                    sprite: TextureAtlasSprite::new(tile_sprite.atlas_sprite_id),
                     ..default()
-                }).insert(Collider);
+                }).insert(Collider).insert(tile_sprite.clone()).id();
+                tile_vec.push(tile_sprite);
             }
             col += 1;
             if count % columns == 0 {
-                col = 1;
-                row += 1;
+                col = 0;
+                row -= 1;
             }
             count += 1;
         }
+        z_order += 0.1;
+        commands.spawn()
+            .insert(Transform::default())
+            .insert(GlobalTransform::default())
+            .insert(MapLayer)
+            .push_children(&tile_vec);
     }
+    return z_order;
 }

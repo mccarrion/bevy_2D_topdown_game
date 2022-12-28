@@ -1,0 +1,562 @@
+[
+  {
+    "id": 0,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 1,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 2,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 3,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 4,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 5,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 6,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 7,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 8,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 9,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 10,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 11,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 12,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 13,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 14,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 15,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 16,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 17,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 18,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 19,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 20,
+    "left": true,
+    "right": true,
+    "top": true,
+    "bottom": false
+  },
+  {
+    "id": 21,
+    "left": true,
+    "right": true,
+    "top": true,
+    "bottom": true
+  },
+  {
+    "id": 22,
+    "left": true,
+    "right": true,
+    "top": true,
+    "bottom": true
+  },
+  {
+    "id": 23,
+    "left": true,
+    "right": true,
+    "top": true,
+    "bottom": true
+  },
+  {
+    "id": 24,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 25,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 26,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 27,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 28,
+    "left": false,
+    "right": true,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 29,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": true
+  },
+  {
+    "id": 30,
+    "left": true,
+    "right": true,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 31,
+    "left": true,
+    "right": false,
+    "top": true,
+    "bottom": false
+  },
+  {
+    "id": 32,
+    "left": false,
+    "right": false,
+    "top": true,
+    "bottom": false
+  },
+  {
+    "id": 33,
+    "left": false,
+    "right": true,
+    "top": true,
+    "bottom": false
+  },
+  {
+    "id": 34,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 35,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 36,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 37,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 38,
+    "left": false,
+    "right": false,
+    "top": true,
+    "bottom": false
+  },
+  {
+    "id": 39,
+    "left": true,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 40,
+    "left": true,
+    "right": true,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 41,
+    "left": true,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 42,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 43,
+    "left": false,
+    "right": true,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 44,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 45,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 46,
+    "left": true,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 47,
+    "left": false,
+    "right": false,
+    "top": true,
+    "bottom": false
+  },
+  {
+    "id": 48,
+    "left": false,
+    "right": false,
+    "top": true,
+    "bottom": false
+  },
+  {
+    "id": 49,
+    "left": false,
+    "right": true,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 50,
+    "left": true,
+    "right": true,
+    "top": false,
+    "bottom": true
+  },
+  {
+    "id": 51,
+    "left": true,
+    "right": false,
+    "top": false,
+    "bottom": true
+  },
+  {
+    "id": 52,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": true
+  },
+  {
+    "id": 53,
+    "left": false,
+    "right": true,
+    "top": false,
+    "bottom": true
+  },
+  {
+    "id": 54,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 55,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 56,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": true
+  },
+  {
+    "id": 57,
+    "left": false,
+    "right": true,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 58,
+    "left": true,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 59,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": true
+  },
+  {
+    "id": 60,
+    "left": false,
+    "right": true,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 61,
+    "left": false,
+    "right": false,
+    "top": true,
+    "bottom": true
+  },
+  {
+    "id": 62,
+    "left": false,
+    "right": false,
+    "top": true,
+    "bottom": true
+  },
+  {
+    "id": 63,
+    "left": false,
+    "right": true,
+    "top": true,
+    "bottom": true
+  },
+  {
+    "id": 64,
+    "left": true,
+    "right": false,
+    "top": true,
+    "bottom": false
+  },
+  {
+    "id": 65,
+    "left": false,
+    "right": true,
+    "top": true,
+    "bottom": false
+  },
+  {
+    "id": 66,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 67,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 68,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 69,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 70,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 71,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 72,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 73,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 74,
+    "left": true,
+    "right": false,
+    "top": false,
+    "bottom": true
+  },
+  {
+    "id": 75,
+    "left": false,
+    "right": true,
+    "top": false,
+    "bottom": true
+  },
+  {
+    "id": 76,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 77,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 78,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  },
+  {
+    "id": 79,
+    "left": false,
+    "right": false,
+    "top": false,
+    "bottom": false
+  }
+]

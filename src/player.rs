@@ -3,15 +3,15 @@ use bevy::{
     prelude::*,
     sprite::collide_aabb::{collide, Collision},
 };
-use crate::global::TIME_STEP;
-use crate::boundary::*;
+use crate::global::*;
+use crate::tileset::TileSprite;
 
 // Player constants
-pub const PLAYER_SIZE: Vec3 = const_vec3!([3.0, 3.0, 0.0]);
+pub const PLAYER_SIZE: f32 = 3.0;
 pub const PLAYER_SPEED: f32 = 700.0;
 pub const PLAYER_PADDING: f32 = 10.0;
-pub const STARTING_Y: f32 = 0.0;
-pub const STARTING_X: f32 = 0.0;
+pub const STARTING_Y: f32 = 2500.0;
+pub const STARTING_X: f32 = 3000.0;
 
 #[derive(Component)]
 pub struct Player;
@@ -23,7 +23,7 @@ pub fn move_player(
     keyboard_input: Res<Input<KeyCode>>,
     mut player_query: Query<&mut Transform, With<Player>>,
     mut camera_query: Query<&mut Transform, (With<Camera>, Without<Player>)>,
-    collider_query: Query<(&Transform), (With<Collider>, Without<Player>, Without<Camera>)>,
+    collider_query: Query<(&Transform, &TileSprite), (With<Collider>, Without<Player>, Without<Camera>)>,
     mut collision_events: EventWriter<CollisionEvent>,
 ) {
     let mut player_transform = player_query.single_mut();
@@ -51,33 +51,53 @@ pub fn move_player(
     let new_player_position_y = player_transform.translation.y + direction_y * PLAYER_SPEED * TIME_STEP;
     let future_y_position: Vec3 = const_vec3!([player_transform.translation.x, new_player_position_y, 0.0]);
 
-    let player_size = player_transform.scale.truncate();
-
     let mut x_collided = false;
     let mut y_collided = false;
 
-    for (transform) in collider_query.iter() {
-
+    for (transform, tilesprite) in collider_query.iter() {
         let collision_x = collide(
             future_x_position,
-            player_size,
+            Vec2::splat(PLAYER_SIZE * 10.0),
             transform.translation,
-            transform.scale.truncate(),
+            Vec2::splat(PLAYER_SIZE * 25.0),
         );
-        if let Some(_collision_x) = collision_x {
-            collision_events.send_default();
-            x_collided = true;
+        if let Some(collision_x) = collision_x {
+            match collision_x {
+                Collision::Left => {
+                    x_collided = tilesprite.left;
+                }
+                Collision::Right => {
+                    x_collided = tilesprite.right;
+                }
+                Collision::Top => {/* do nothing */}
+                Collision::Bottom => {/* do nothing */}
+                Collision::Inside => {/* do nothing */}
+            }
         }
 
         let collision_y = collide(
             future_y_position,
-            player_size,
+            Vec2::splat(PLAYER_SIZE * 15.0),
             transform.translation,
-            transform.scale.truncate(),
+            Vec2::splat(PLAYER_SIZE * 15.0),
         );
-        if let Some(_collision_y) = collision_y {
+
+        if let Some(collision_y) = collision_y {
+            match collision_y {
+                Collision::Left => {/* do nothing */}
+                Collision::Right => {/* do nothing */}
+                Collision::Top => {
+                    y_collided = tilesprite.top;
+                }
+                Collision::Bottom => {
+                    y_collided = tilesprite.bottom;
+                }
+                Collision::Inside => {/* do nothing */}
+            }
+        }
+
+        if x_collided || y_collided {
             collision_events.send_default();
-            y_collided = true;
         }
     }
 
@@ -129,7 +149,6 @@ pub fn animate_player_sprite(
             if keyboard_input.pressed(KeyCode::Right) {
                 sprite.index = (sprite.index + 1) % (num_cols) + (num_cols * 3);
             }
-
         }
     }
 }

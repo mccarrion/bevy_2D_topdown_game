@@ -1,20 +1,16 @@
 pub mod player;
-pub mod boundary;
 pub mod global;
-pub mod map;
 pub mod tileset;
 
 use std::collections::HashMap;
 use std::fs;
-use std::path::Path;
 
 use bevy::{
     core::FixedTimestep,
     prelude::*,
 };
-use crate::boundary::*;
+use serde_json::from_str;
 use crate::global::*;
-use crate::map::*;
 use crate::player::*;
 use crate::tileset::*;
 
@@ -46,20 +42,32 @@ fn setup(
     let mut z_order: f32 = 0.0;
 
     // TileSet
-    let texture_atlas_map: HashMap<i16, TextureAtlas> = map_texture_atlas_to_gid(&asset_server);
+    let texture_atlas_map: HashMap<TileSetId, TextureAtlas> = map_texture_atlas_to_gid(&asset_server);
 
     let mut atlas_to_sprite_map: HashMap<usize, TileSprite> = HashMap::new();
-    for (gid, texture_atlas) in texture_atlas_map.clone() {
+    for (tilesetid, texture_atlas) in texture_atlas_map.clone() {
         let atlas_handle = texture_atlases.add(texture_atlas.clone());
-        for n in 1..(texture_atlas.len() + 1) {
+
+        let str: String = String::from(&tilesetid.source);
+
+        let metadata_json_dir: String = str.replace("../tilesets", "assets/tiled/metadata");
+        let metadata_json: String = fs::read_to_string(metadata_json_dir).unwrap();
+        let metadata_vec: Vec<TileMetadata> = from_str(&metadata_json).unwrap();
+
+        for n in 0..texture_atlas.len() {
+            let metadata: &TileMetadata = metadata_vec.get(n).clone().unwrap();
             let tile_sprite = TileSprite {
                 atlas_handle: atlas_handle.clone(),
-                atlas_sprite: TextureAtlasSprite::new(n-1)
+                atlas_sprite_id: n,
+                left: metadata.left,
+                right: metadata.right,
+                top: metadata.top,
+                bottom: metadata.bottom,
             };
-            atlas_to_sprite_map.insert(gid as usize + n - 1, tile_sprite);
+            atlas_to_sprite_map.insert(tilesetid.firstgid as usize + n, tile_sprite);
         }
     }
-    spawn_map(&mut commands, atlas_to_sprite_map);
+    z_order = spawn_map(&mut commands, atlas_to_sprite_map, z_order);
 
     // Player
     let texture_handle = asset_server
@@ -76,12 +84,11 @@ fn setup(
         .insert_bundle(SpriteSheetBundle {
             transform: Transform {
                 translation: Vec3::new(STARTING_X, STARTING_Y, z_order),
-                scale: PLAYER_SIZE,
+                scale: Vec3::splat(PLAYER_SIZE),
                 ..default()
             },
             texture_atlas: texture_atlas_handle,
             ..default()
         })
         .insert(AnimationTimer::new(Timer::from_seconds(0.1, true)));
-    z_order += 0.1;
 }
