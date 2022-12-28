@@ -3,9 +3,8 @@ use bevy::{
     prelude::*,
     sprite::collide_aabb::{collide, Collision},
 };
-use crate::global::TIME_STEP;
-use crate::boundary::*;
-use crate::tileset::{TileMetadata, TileSprite};
+use crate::global::*;
+use crate::tileset::TileSprite;
 
 // Player constants
 pub const PLAYER_SIZE: f32 = 3.0;
@@ -51,8 +50,6 @@ pub fn move_player(
     }
     let new_player_position_y = player_transform.translation.y + direction_y * PLAYER_SPEED * TIME_STEP;
     let future_y_position: Vec3 = const_vec3!([player_transform.translation.x, new_player_position_y, 0.0]);
-
-    let player_size = player_transform.scale.truncate();
 
     let mut x_collided = false;
     let mut y_collided = false;

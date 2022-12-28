@@ -1,21 +1,16 @@
 pub mod player;
-pub mod boundary;
 pub mod global;
-pub mod map;
 pub mod tileset;
 
 use std::collections::HashMap;
 use std::fs;
-use std::path::Path;
 
 use bevy::{
     core::FixedTimestep,
     prelude::*,
 };
 use serde_json::from_str;
-use crate::boundary::*;
 use crate::global::*;
-use crate::map::*;
 use crate::player::*;
 use crate::tileset::*;
 
@@ -57,7 +52,7 @@ fn setup(
 
         let metadata_json_dir: String = str.replace("../tilesets", "assets/tiled/metadata");
         let metadata_json: String = fs::read_to_string(metadata_json_dir).unwrap();
-        let mut metadata_vec: Vec<TileMetadata> = from_str(&metadata_json).unwrap();
+        let metadata_vec: Vec<TileMetadata> = from_str(&metadata_json).unwrap();
 
         for n in 0..texture_atlas.len() {
             let metadata: &TileMetadata = metadata_vec.get(n).clone().unwrap();
@@ -96,5 +91,4 @@ fn setup(
             ..default()
         })
         .insert(AnimationTimer::new(Timer::from_seconds(0.1, true)));
-    z_order += 0.1;
 }
