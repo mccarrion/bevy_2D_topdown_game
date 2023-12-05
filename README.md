@@ -2,7 +2,11 @@
 Currently, this game is an animated sprite that can move within a set of boundaries on a map dynamically generated based
 on Tiled configuration.
 
-# UPDATE 12/04/23
+On the **TODO** list:
+- Bind TileMap to vertex and texture mapping buffers once during initial startup rather for every single frame refresh
+- Fix how blending works so that the look of the TileMap is cleaner
+
+### Update 12/04/23
 On the side, I have been learning how to use OpenGL APIs directly with C/C++ and ultimately rewrote this project from
 Rust to C/C++ over the course of a few months. Today is the day all the files got dropped in the repository
 
@@ -51,6 +55,16 @@ and then **brew** will install the package for you in a directory that CMake is 
 
 On Windows I suggest taking a look at this [page](https://glew.sourceforge.net/install.html) for installing GLEW. You
 literally have to drop a glew DLL into your System32 folder in order for it to work.
+
+## Notes on how to build projects with CMake:
+
+For one go to the CMake [website](https://cmake.org/) and install CMake.
+
+Then I would take a look at this doc page from SDL: [Building SDL](https://wiki.libsdl.org/SDL2/README/cmake). You should be able 
+to repeat the same steps it takes to build SDL for any library that needs to be linked to this project: glm, nlohmann_json, etc.
+
+Fortunately or unfortunately, all projects have to be either built locally or if they are prebuilt they have to be built 
+to target your local environment (aka Windows + x86 if you are using a Windows computer with an Intel chip).
 
 # credit
 Credit for assets: [Cup Nooble](https://cupnooble.itch.io/) 
