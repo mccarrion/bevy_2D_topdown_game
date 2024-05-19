@@ -33,6 +33,8 @@
 #include "headers/character.h"
 #include "headers/graphics.h"
 
+using namespace std;
+
 struct background_color {
     float r, g, b, a;
 };
@@ -76,11 +78,11 @@ int main() {
     // Init data and context structs
     window_info win_info = init_window_info(win);
 
-    struct background_color bg{};
-    bg.r = 182.0f / 255.0f,
-    bg.g = 186.0f / 255.0f,
-    bg.b = 186.0f / 255.0f,
-    bg.a = 1.0f;
+    unique_ptr<background_color> bg(new background_color);
+    bg->r = 182.0f / 255.0f,
+    bg->g = 186.0f / 255.0f,
+    bg->b = 186.0f / 255.0f,
+    bg->a = 1.0f;
 
     // Create and compile our GLSL program from the shaders
     struct gl_shader_objects shader_objects = load_shader_objects("../src/shaders/vertex_shader.glsl",
@@ -107,7 +109,7 @@ int main() {
         // Draw new frame
         glfwGetWindowSize(win, &width, &height);
         glViewport(0, 0, width * xscale, height * yscale);
-        glClearColor(bg.r, bg.g, bg.b, bg.a);
+        glClearColor(bg->r, bg->g, bg->b, bg->a);
         glClear(GL_COLOR_BUFFER_BIT);
         render_scene(shader_objects, player, tm, width, height);
 
