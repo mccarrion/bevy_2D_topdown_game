@@ -1,18 +1,19 @@
-struct window_info init_window_info(GLFWwindow *win) {
-    window_info win_meta = {};
+std::unique_ptr<window_info> init_window_info(GLFWwindow *win) {
+    std::unique_ptr<window_info> win_meta(new window_info);
     glfwSetWindowUserPointer(win, &win_meta);
-    win_meta.win = win;
+    win_meta->win = win;
     return win_meta;
 }
 
-void update_window_info(struct window_info *win_info) {
+unique_ptr<window_info> update_window_info(unique_ptr<window_info> win_info) {
     struct GLFWwindow *win = win_info->win;
     glfwGetWindowSize(win, &win_info->width, &win_info->height);
     glfwGetFramebufferSize(win, &win_info->display_width, &win_info->display_height);
+    return win_info;
 }
 
-void shutdown_program(struct window_info *win_info,
-                      struct gl_shader_objects *shader_objects) {
+void shutdown_program(unique_ptr<window_info> *win_info,
+                      unique_ptr<gl_shader_objects> shader_objects) {
     glDeleteProgram(shader_objects->program);
     glDeleteBuffers(1, &shader_objects->vertex_buffer_object);
     glDeleteBuffers(1, &shader_objects->element_buffer_object);
@@ -23,7 +24,8 @@ static void error_callback(int e, const char *d) {
     printf("Error %d: %s\n", e, d);
 }
 
-void render_scene(gl_shader_objects shader_objects, character player, tilemap tm, int window_width, int window_height) {
+void render_scene(const gl_shader_objects *shader_objects, const character *player, const tilemap *tm, int window_width,
+                  int window_height) {
     // Create projection matrix using an Orthographic camera
     glm::mat4 model = glm::mat4(1.0f);
     glm::mat4 view = glm::lookAt(
@@ -32,9 +34,9 @@ void render_scene(gl_shader_objects shader_objects, character player, tilemap tm
             glm::vec3(0, 1, 0)
     );
     float aspect = (float) window_width / (float) window_height;
-    glm::mat4 projection = glm::ortho(-4.0f * aspect + player.x_translation, 4.0f * aspect + player.x_translation,
-                                      -3.0f + (player.y_translation / (aspect - 0.1f)),
-                                      3.0f + (player.y_translation / (aspect - 0.1f)),
+    glm::mat4 projection = glm::ortho(-4.0f * aspect + player->x_translation, 4.0f * aspect + player->x_translation,
+                                      -3.0f + (player->y_translation / (aspect - 0.1f)),
+                                      3.0f + (player->y_translation / (aspect - 0.1f)),
                                       0.0f, 100.0f);
     glm::mat4 projection_matrix = projection * view * model;
 
@@ -44,14 +46,15 @@ void render_scene(gl_shader_objects shader_objects, character player, tilemap tm
     std::vector<int> num_vertices;
     int startOffset = 0;
 
-    for (const tiles::tilelayer& tl: tm.map.layers) {
+    for (const tiles::tilelayer &tl: tm->map.layers) {
         std::vector<int> data = tl.data;
         float x = -40;
         float y = 0;
         int width = tl.width;
         int count = 0;
+        auto tilesprite_by_id = tm->tilesprite_by_id;
         for (int tilegid: data) {
-            tiles::tilesprite tsp = tm.tilesprite_by_id[tilegid];
+            tiles::tilesprite tsp = tilesprite_by_id[tilegid];
             vertices.insert(vertices.end(), {
                     0.3f + x, -0.3f + y, 0.0f,
                     0.3f + x, 0.3f + y, 0.0f,
@@ -82,13 +85,15 @@ void render_scene(gl_shader_objects shader_objects, character player, tilemap tm
     startOffset += 4;
 
     vertices.insert(vertices.end(), {
-            0.3f + player.x_translation, -0.3f + player.y_translation, 0.0f,
-            0.3f + player.x_translation, 0.3f + player.y_translation, 0.0f,
-            -0.3f + player.x_translation, 0.3f + player.y_translation, 0.0f,
-            -0.3f + player.x_translation, -0.3f + player.y_translation, 0.0f
+            0.3f + player->x_translation, -0.3f + player->y_translation, 0.0f,
+            0.3f + player->x_translation, 0.3f + player->y_translation, 0.0f,
+            -0.3f + player->x_translation, 0.3f + player->y_translation, 0.0f,
+            -0.3f + player->x_translation, -0.3f + player->y_translation, 0.0f
     });
+    auto frames = player->char_frames;
+    auto frame_offset = player->frame_offset;
 
-    struct frame char_frame = player.char_frames[player.frame_offset];
+    auto char_frame = frames[frame_offset];
     texcoords.insert(texcoords.end(), {
             char_frame.right, char_frame.bottom,    // bottom right
             char_frame.right, char_frame.top,       // top right
@@ -98,20 +103,20 @@ void render_scene(gl_shader_objects shader_objects, character player, tilemap tm
 
 
     // setup program
-    glUseProgram(shader_objects.program);
-    glUniformMatrix4fv(shader_objects.projection_matrix, 1, GL_FALSE, &projection_matrix[0][0]);
+    glUseProgram(shader_objects->program);
+    glUniformMatrix4fv(shader_objects->projection_matrix, 1, GL_FALSE, &projection_matrix[0][0]);
 
     // Bind buffer of vertices and start at point 0 in attrib array
-    glBindVertexArray(shader_objects.vertex_array_object);
-    glBindBuffer(GL_ARRAY_BUFFER, shader_objects.vertex_buffer_object);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shader_objects.element_buffer_object);
+    glBindVertexArray(shader_objects->vertex_array_object);
+    glBindBuffer(GL_ARRAY_BUFFER, shader_objects->vertex_buffer_object);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shader_objects->element_buffer_object);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices.front(), GL_STATIC_DRAW);
 
     GLuint texcoords_vertex_buffer_object;
     glGenBuffers(1, &texcoords_vertex_buffer_object);
     glBindBuffer(GL_ARRAY_BUFFER, texcoords_vertex_buffer_object);
     glBufferData(GL_ARRAY_BUFFER, texcoords.size() * sizeof(float), &texcoords.front(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, shader_objects.vertex_buffer_object);
+    glBindBuffer(GL_ARRAY_BUFFER, shader_objects->vertex_buffer_object);
 
     glVertexAttribPointer(
             0,

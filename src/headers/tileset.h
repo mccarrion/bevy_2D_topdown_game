@@ -216,7 +216,7 @@ struct texture_atlas {
     std::unordered_map<std::string, texture_data> image_data_map;
 };
 
-texture_atlas load_texture_atlas(const char *dir_name) {
+unique_ptr<texture_atlas> load_texture_atlas(const char *dir_name) {
     GLuint textures;
     int force_channels = 4;
     stbi_set_flip_vertically_on_load(true);
@@ -250,15 +250,15 @@ texture_atlas load_texture_atlas(const char *dir_name) {
         }
     }
 
-    texture_atlas atlas{};
-    atlas.height = max_height;
-    atlas.width = total_width;
-    atlas.image_data_map = image_data_map;
+    unique_ptr<texture_atlas> atlas(new texture_atlas);
+    atlas->height = max_height;
+    atlas->width = total_width;
+    atlas->image_data_map = image_data_map;
 
     glGenTextures(1, &textures);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textures);
-    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, atlas.width, atlas.height);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, atlas->width, atlas->height);
     for (auto &[file_name, tex]: image_data_map) {
         unsigned char *image_data = stbi_load(file_name.c_str(), &tex.width, &tex.height, &tex.comp, force_channels);
         if (!image_data) {
@@ -281,8 +281,8 @@ texture_atlas load_texture_atlas(const char *dir_name) {
 }
 
 
-tilemap load_tilemap(texture_atlas *atlas) {
-    tilemap tilemap = {};
+unique_ptr<tilemap> load_tilemap(const texture_atlas *atlas) {
+    unique_ptr<tilemap> tm(new tilemap);
     std::string tileset_map_json = read_string_from_path("../assets/tiled/maps/sprout_land.tmj");
     nlohmann::json tmj = nlohmann::json::parse(tileset_map_json);
     auto tmap = tmj.template get<tiles::map>();
@@ -296,7 +296,8 @@ tilemap load_tilemap(texture_atlas *atlas) {
         tiles::tileset ts = tsj.template get<tiles::tileset>();
         std::string image_location = ts.image;
         image_location.replace(image_location.begin(), image_location.begin() + 5, "../assets");
-        texture_data tex = atlas->image_data_map[image_location];
+        auto image_data_map = atlas->image_data_map;
+        texture_data tex = image_data_map[image_location];
         int col = 0;
         int row = 0;
         for (int i = tsid.firstgid; i < tsid.firstgid + ts.tilecount; i++) {
@@ -323,7 +324,7 @@ tilemap load_tilemap(texture_atlas *atlas) {
             tilesprite_map[i] = tsp;
         }
     }
-    tilemap.tilesprite_by_id = tilesprite_map;
-    tilemap.map = tmap;
-    return tilemap;
+    tm->tilesprite_by_id = tilesprite_map;
+    tm->map = tmap;
+    return tm;
 }

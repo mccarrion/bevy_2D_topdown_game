@@ -28,12 +28,12 @@
 #define WINDOW_WIDTH 1200
 #define WINDOW_HEIGHT 800
 
+using namespace std;
+
 #include "headers/shader.h"
 #include "headers/tileset.h"
 #include "headers/character.h"
 #include "headers/graphics.h"
-
-using namespace std;
 
 struct background_color {
     float r, g, b, a;
@@ -76,7 +76,7 @@ int main() {
     }
 
     // Init data and context structs
-    window_info win_info = init_window_info(win);
+    unique_ptr<window_info> win_info = init_window_info(win);
 
     unique_ptr<background_color> bg(new background_color);
     bg->r = 182.0f / 255.0f,
@@ -85,14 +85,14 @@ int main() {
     bg->a = 1.0f;
 
     // Create and compile our GLSL program from the shaders
-    struct gl_shader_objects shader_objects = load_shader_objects("../src/shaders/vertex_shader.glsl",
-                                                                  "../src/shaders/fragment_shader.glsl");
+    unique_ptr<gl_shader_objects> shader_objects = load_shader_objects("../src/shaders/vertex_shader.glsl",
+                                                                       "../src/shaders/fragment_shader.glsl");
 
 
-    texture_atlas atlas = load_texture_atlas("../assets/sprout_lands");
-    struct character player = initialize_player(&atlas,
-                                                "../assets/sprout_lands/characters/basic_character_spritesheet.png");
-    struct tilemap tm = load_tilemap(&atlas); // TODO: map offsets from atlas to tilemap
+    unique_ptr<texture_atlas> atlas = load_texture_atlas("../assets/sprout_lands");
+    unique_ptr<character> player = initialize_player(atlas.get(),
+                                                     "../assets/sprout_lands/characters/basic_character_spritesheet.png");
+    unique_ptr<tilemap> tm = load_tilemap(atlas.get()); // TODO: map offsets from atlas to tilemap
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -103,20 +103,20 @@ int main() {
     while (!glfwWindowShouldClose(win)) {
         // Collect events from inbetween last frame and current frame
         glfwPollEvents();
-        update_window_info(&win_info);
-        update_from_user_input(&win_info, &player);
+        win_info = update_window_info(std::move(win_info));
+        player = update_from_user_input(win_info.get(), std::move(player));
 
         // Draw new frame
         glfwGetWindowSize(win, &width, &height);
         glViewport(0, 0, width * xscale, height * yscale);
         glClearColor(bg->r, bg->g, bg->b, bg->a);
         glClear(GL_COLOR_BUFFER_BIT);
-        render_scene(shader_objects, player, tm, width, height);
+        render_scene(shader_objects.get(), player.get(), tm.get(), width, height);
 
         // Swap buffers
         glfwSwapBuffers(win);
     }
-    shutdown_program(&win_info, &shader_objects);
+    shutdown_program(&win_info, std::move(shader_objects));
     glfwTerminate();
     return 0;
 }
