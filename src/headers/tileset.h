@@ -187,7 +187,7 @@ namespace tiles {
     };
 }
 
-struct tilemap {
+struct tilemap : object {
     std::unordered_map<int, tiles::tilesprite> tilesprite_by_id;
     tiles::map map;
 };

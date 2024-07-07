@@ -30,6 +30,10 @@
 
 using namespace std;
 
+struct object {
+    string object_id;
+};
+
 #include "headers/shader.h"
 #include "headers/tileset.h"
 #include "headers/character.h"
@@ -100,18 +104,22 @@ int main() {
     glCullFace(GL_BACK);    // cull back face
     glFrontFace(GL_CCW);    // GL_CCW for counter clock-wise
 
+    unique_ptr<vertex_data> vert_data = calculate_tilemap_vertices(player.get(), tm.get());
+
     while (!glfwWindowShouldClose(win)) {
         // Collect events from inbetween last frame and current frame
         glfwPollEvents();
         win_info = update_window_info(std::move(win_info));
         player = update_from_user_input(win_info.get(), std::move(player));
+        vert_data = update_player_vertices(std::move(vert_data), player.get());
 
         // Draw new frame
         glfwGetWindowSize(win, &width, &height);
         glViewport(0, 0, width * xscale, height * yscale);
         glClearColor(bg->r, bg->g, bg->b, bg->a);
         glClear(GL_COLOR_BUFFER_BIT);
-        render_scene(shader_objects.get(), player.get(), tm.get(), width, height);
+        render_scene(shader_objects.get(), player.get(),
+                     vert_data.get(), width, height);
 
         // Swap buffers
         glfwSwapBuffers(win);
