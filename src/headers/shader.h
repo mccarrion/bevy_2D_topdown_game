@@ -83,26 +83,26 @@ GLuint generate_shader_program(const char *vertex_file_path,
     return program;
 }
 
-struct gl_shader_objects load_shader_objects(const char *vertex_file_path,
+unique_ptr<gl_shader_objects> load_shader_objects(const char *vertex_file_path,
                                              const char *fragment_file_path) {
     // Begin initializing draw data
-    gl_shader_objects shader_objects{};
-    shader_objects.program = generate_shader_program(vertex_file_path, fragment_file_path);
+    unique_ptr<gl_shader_objects> shader_objects(new gl_shader_objects);
+    shader_objects->program = generate_shader_program(vertex_file_path, fragment_file_path);
 
     // initialize location data
-    shader_objects.projection_matrix = glGetUniformLocation(shader_objects.program, "projection_matrix");
-    shader_objects.attrib_position = glGetAttribLocation(shader_objects.program, "attrib_position");
+    shader_objects->projection_matrix = glGetUniformLocation(shader_objects->program, "projection_matrix");
+    shader_objects->attrib_position = glGetAttribLocation(shader_objects->program, "attrib_position");
 
-    glGenBuffers(1, &shader_objects.vertex_buffer_object);
-    glGenBuffers(1, &shader_objects.element_buffer_object);
-    glGenVertexArrays(1, &shader_objects.vertex_array_object);
+    glGenBuffers(1, &shader_objects->vertex_buffer_object);
+    glGenBuffers(1, &shader_objects->element_buffer_object);
+    glGenVertexArrays(1, &shader_objects->vertex_array_object);
 
-    glBindVertexArray(shader_objects.vertex_array_object);
-    glBindBuffer(GL_ARRAY_BUFFER, shader_objects.vertex_buffer_object);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shader_objects.element_buffer_object);
+    glBindVertexArray(shader_objects->vertex_array_object);
+    glBindBuffer(GL_ARRAY_BUFFER, shader_objects->vertex_buffer_object);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shader_objects->element_buffer_object);
 
-    glEnableVertexAttribArray((GLuint) shader_objects.attrib_position);
-    glVertexAttribPointer((GLuint) shader_objects.attrib_position, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+    glEnableVertexAttribArray((GLuint) shader_objects->attrib_position);
+    glVertexAttribPointer((GLuint) shader_objects->attrib_position, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
